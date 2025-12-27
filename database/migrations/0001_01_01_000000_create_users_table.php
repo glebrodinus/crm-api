@@ -21,6 +21,8 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        // Will not use it for now, but good to have it ready
+        // Will use code-based password resets
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
