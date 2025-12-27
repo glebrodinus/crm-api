@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\App;
 
 class AuthController extends Controller
 {
-    protected $apiReturn;
     protected $tokenTtl;
     protected EmailService $emailService;
 
@@ -21,7 +20,9 @@ class AuthController extends Controller
         $this->tokenTtl = (int) config('options.admin.verification_token_ttl'); 
     }
 
-    // Register a new user
+    /*
+    * Register a new user
+     */
     public function register(Request $request)
     {
         $request->validate([
@@ -60,7 +61,9 @@ class AuthController extends Controller
         return $this->success('User registered successfully', [], 201);
     }
 
-    // Login and generate token
+    /**
+     * User login
+     */
     public function login(Request $request)
     {
         $request->validate([
@@ -87,13 +90,17 @@ class AuthController extends Controller
         ]);
     }
 
-    // Get authenticated user
+    /**
+     * Get authenticated user
+     */
     public function user(Request $request)
     {
         return $this->success('Authenticated user', $request->user());
     }
 
-    // Logout user (Revoke only current token)
+    /**
+     * Logout and revoke token
+     */
     public function logout(Request $request)
     {
         $user = $request->user();
@@ -106,35 +113,27 @@ class AuthController extends Controller
         return $this->error('User not authenticated', [], 401);
     }
 
-    // Create token for verification
+    /**
+     * Create verification token
+     */
     public function createToken(Request $request)
     {   
         $validated = $request->validate([
             'identifier' => 'required',
             'delivery_method' => 'required|in:email,sms,call',
-            'unique_user_identifier' => 'nullable|boolean',
         ]);
 
         // Remove any existing tokens for this identifier
         VerificationToken::where('identifier', $validated['identifier'])->delete();
 
-        if($request->unique_user_identifier) {
+        // Validate the identifier if user exists
+        if($request->identifier === 'email') {
+            $user = User::where('email', strtolower($request->identifier))->first();
+        } 
 
-            // Check if the identifier is an email or phone number
-            $identifierType = $this->getIdentifierType($request->identifier);
-
-            // Validate the identifier if user exists
-            if($identifierType === 'email') {
-                $user = User::where($this->getIdentifierType($request->identifier), strtolower($request->identifier))->first();
-            } else {
-                $user = User::where('cell_phone', $request->identifier)->orWhere('phone', $request->identifier)->first();
-            }
-
-            if ($user) {
-                // User already exists with this identifier
-                return $this->error('User already exists with this '. $identifierType, [], 409);
-            }
-
+        if ($user) {
+            // User already exists with this identifier
+            return $this->error('User already exists with this email.', [], 409);
         }
 
         // Create a new token record
@@ -142,10 +141,7 @@ class AuthController extends Controller
             'identifier' => $validated['identifier'], // Use 'identifier'
         ]);
 
-        if( 
-            $request->delivery_method === 'email' 
-            && $this->getIdentifierType($request->identifier) === 'email'
-        ) {
+        if($request->delivery_method === 'email') {
             $this->emailService->sendVerification($request->identifier, $token->code);
         }
 
@@ -162,7 +158,9 @@ class AuthController extends Controller
         return $this->success('Token created successfully', $return, 201);
     }
 
-    // Verify email token
+    /**
+     * Verify token
+     */
     public function verifyToken(Request $request)
     {
         // Validate query parameters instead of request body
@@ -194,21 +192,6 @@ class AuthController extends Controller
         ];
     
         return $this->success('Token verified successfully', $return, 200);
-    }
-
-    public function getIdentifierType($identifier)
-    {
-        // Check if it's an email
-        if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
-            return 'email';
-        }
-    
-        // Check if it's a phone number (supports various formats)
-        if (preg_match('/^\+?[0-9]{7,15}$/', $identifier)) {
-            return 'phone';
-        }
-    
-        return 'unknown';
     }
 
 }
