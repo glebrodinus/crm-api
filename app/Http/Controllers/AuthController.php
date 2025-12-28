@@ -20,8 +20,8 @@ class AuthController extends Controller
         $this->tokenTtl = (int) config('options.admin.verification_token_ttl'); 
     }
 
-    /*
-    * Register a new user
+    /**
+     * Register a new user
      */
     public function register(Request $request)
     {
