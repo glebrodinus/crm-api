@@ -19,19 +19,20 @@ class UserController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
+     * List all users.
      */
     public function index()
     {
-        //
+        $users = User::all();
+        return $this->success('Users retrieved successfully', $users);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show a specific user.
      */
-    public function create()
+    public function show(User $user)
     {
-        //
+        return $this->success('User retrieved successfully', $user);
     }
 
     /**
@@ -39,39 +40,42 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Using registration endpoint instead
     }
 
     /**
-     * Display the specified resource.
+     * Update a user.
      */
-    public function show(string $id)
+    public function update(Request $request, User $user)
     {
-        //
+        // Validate the request data
+
+        $validatedData = $request->validate([
+            'first_name' => 'sometimes|required|string|max:255',
+            'last_name' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
+            // 'password' => 'sometimes|required|string|min:5|confirmed',
+        ]);
+
+        // Update the user instance
+        $user->update(array_filter($validatedData));
+
+        $return = User::find($user->id);
+
+        return $this->success('User updated successfully', $return);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Delete a user.
      */
-    public function edit(string $id)
-    {
-        //
-    }
+    public function destroy(User $user)
+    {       
+        // LATER WE NEED TO VERIFY PASSWORD BEFORE DELETING USER
+        if($user->id === Auth::id()) {
+            $user->delete();
+            return $this->success('User deleted successfully');
+        }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 
     /**
