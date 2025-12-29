@@ -15,6 +15,23 @@ Route::get('/user-exists-by-email', [UserController::class, 'checkUserExistsByEm
 
 // Protected (authenticated)
 Route::middleware('auth:sanctum')->group(function () {
+    
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'user']);
+
+    Route::group(['prefix' => 'user'], function () {
+
+        // User self-service updates
+        Route::prefix('update')->group(function () {
+            Route::put('/name', [UserController::class, 'updateName']);
+            Route::put('/password', [UserController::class, 'updatePassword']);
+            Route::put('/email', [UserController::class, 'updateEmail']);
+            Route::put('/phone', [UserController::class, 'updatePhone']);
+            Route::put('/cell-phone', [UserController::class, 'updateCellPhone']);
+        });
+
+        // Post because need to send data in body
+        Route::post('/delete-account', [UserController::class, 'deleteAccount']);
+    });
+
 });
