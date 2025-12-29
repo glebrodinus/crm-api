@@ -120,16 +120,13 @@ class AuthController extends Controller
     {   
         $validated = $request->validate([
             'identifier' => 'required',
-            'delivery_method' => 'required|in:email,sms,call',
+            'delivery_method' => 'required|in:email,sms',
         ]);
 
         // Remove any existing tokens for this identifier
         VerificationToken::where('identifier', $validated['identifier'])->delete();
 
-        // Validate the identifier if user exists
-        if($request->identifier === 'email') {
-            $user = User::where('email', strtolower($request->identifier))->first();
-        } 
+        $user = User::where('email', strtolower($request->identifier))->first();
 
         if ($user) {
             // User already exists with this identifier
@@ -137,12 +134,17 @@ class AuthController extends Controller
         }
 
         // Create a new token record
+
+        $plainToken = rand(10000, 99999);
+
         $token = VerificationToken::create([
             'identifier' => $validated['identifier'], // Use 'identifier'
+            'type' => $request->delivery_method,
+            'code_hash' => $plainToken,
         ]);
 
         if($request->delivery_method === 'email') {
-            $this->emailService->sendVerification($request->identifier, $token->code);
+            $this->emailService->sendVerification($request->identifier, $plainToken);
         }
 
         $return = [
@@ -151,7 +153,7 @@ class AuthController extends Controller
 
          // For local development environment only
         if (App::environment('local')) {
-            $return['code'] = $token->code;
+            $return['code'] = $plainToken;
         }
 
         // Return response
@@ -169,16 +171,26 @@ class AuthController extends Controller
             'uuid' => 'required|uuid',
         ]);
     
-        $code = $request->query('code'); // Retrieve from query parameters
-        $uuid = $request->query('uuid');   // Retrieve from query parameters
+        $code = $validated['code'];
+        $code_hash = password_hash($code, PASSWORD_BCRYPT);
+        $uuid = $validated['uuid'];
+
+        // $2y$12$8F9W1gWDHJZKojTtfcCAGeHvIsAmM8t98eUL9SV7O5eHoq1yM1uL6
+        // $2y$12$jJ4ehkjWSB6150czA1oBKeW34mVYWUAesPHFEjfUP7qs/F0MR82Ju
+
+        $test_return = [
+            'code' => $code,
+            'code_hash' => $code_hash,
+            'uuid' => $uuid,
+        ];
     
         // Find the token for the given identifier (email)
-        $verificationToken = VerificationToken::where('code', $code)
+        $verificationToken = VerificationToken::where('code_hash', $code_hash)
             ->where('uuid', $uuid)
             ->first();
     
         if (!$verificationToken) {
-            return $this->error('Invalid or expired token', [], 401);
+            return $this->error('Token not found', $test_return, 401);
         }
 
         if($verificationToken->isExpired()) {

@@ -12,7 +12,7 @@ class VerificationToken extends Model
 
     protected $fillable = [
         'uuid',
-        'code',      // 5-digit numeric token
+        'code_hash',      // 5-digit numeric token
         'identifier', // Can be email or phone
         'expires_at',
     ];
@@ -31,9 +31,13 @@ class VerificationToken extends Model
             }
 
             // Generate a random 5-digit numeric token if not set
-            if (empty($model->code)) {
-                $model->code = rand(10000, 99999); // Generate a random 5-digit number
+            if (empty($model->code_hash)) {
+                $plainToken = rand(10000, 99999);
+                $model->code_hash = $plainToken;
             }
+
+            // Hash the token before saving
+            $model->code_hash = password_hash($model->code_hash, PASSWORD_BCRYPT);
 
             // Set expiration time using seconds
             if (empty($model->expires_at)) {

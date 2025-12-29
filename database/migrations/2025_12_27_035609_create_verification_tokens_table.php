@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->uuid('uuid')->unique();
             $table->string('identifier'); // Email or phone number
-            $table->string('type'); // email | phone
+            $table->string('type')->default('email'); // email | phone
             $table->string('code_hash');
             $table->timestamp('expires_at')->index();
             $table->timestamps();
