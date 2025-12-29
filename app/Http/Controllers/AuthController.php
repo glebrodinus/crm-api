@@ -49,8 +49,11 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        $emailToken->delete();
+        if (!$user) {
+            return $this->error('Failed to create user', [], 500);
+        }
 
+        $emailToken->delete();
         return $this->success('User registered successfully', [], 201);
     }
 
