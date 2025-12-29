@@ -8,6 +8,8 @@ use App\Models\User;
 use App\Models\VerificationToken;
 use App\Services\EmailService;
 use Illuminate\Support\Facades\App;
+use Laravel\Sanctum\PersonalAccessToken;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -98,22 +100,9 @@ class AuthController extends Controller
      * Logout and revoke token
      */
     public function logout(Request $request)
-    {   
-        // TESTING PURPOSES ONLY
-        dd([
-            'auth_header' => $request->header('Authorization'),
-            'bearer'      => $request->bearerToken(),
-            'user'        => $request->user(),
-        ]);
-
-        $user = $request->user();
-
-        if ($user) {
-            $user->currentAccessToken()->delete(); // Revoke only the current token
-            return $this->success('Logged out successfully', [], 200);
-        }
-
-        return $this->error('User not authenticated', [], 401);
+    {
+        $request->user()->currentAccessToken()?->delete(); // revoke current token
+        return $this->success('Logged out successfully', [], 200);
     }
 
     /**
