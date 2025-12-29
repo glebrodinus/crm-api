@@ -98,7 +98,14 @@ class AuthController extends Controller
      * Logout and revoke token
      */
     public function logout(Request $request)
-    {
+    {   
+        // TESTING PURPOSES ONLY
+        dd([
+            'auth_header' => $request->header('Authorization'),
+            'bearer'      => $request->bearerToken(),
+            'user'        => $request->user(),
+        ]);
+
         $user = $request->user();
 
         if ($user) {
