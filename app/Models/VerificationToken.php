@@ -9,13 +9,14 @@ use Illuminate\Support\Facades\Hash;
 
 class VerificationToken extends Model
 {
-    public $timestamps = false;
 
     protected $fillable = [
         'uuid',
-        'code_hash',      // 5-digit numeric token
         'identifier', // Can be email or phone
+        'type', // 'email' or 'phone'
+        'code_hash', // 5-digit numeric token (hashed)
         'expires_at',
+        'verified_at',
     ];
 
     // Automatically generate a UUID, numeric token, and expiration on creation

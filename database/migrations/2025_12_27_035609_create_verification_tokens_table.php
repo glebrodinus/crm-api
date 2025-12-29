@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('type')->default('email'); // email | phone
             $table->string('code_hash');
             $table->timestamp('expires_at')->index();
+            $table->timestamp('verified_at')->nullable()->index();
             $table->timestamps();
             
             // Only one active token per identifier + type

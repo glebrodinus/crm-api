@@ -36,16 +36,10 @@ class AuthController extends Controller
         // Check if the email verification token is valid
         $emailToken = VerificationToken::where('uuid', $request->email_verification_token_uuid)
             ->where('identifier', strtolower($request->email))
+            ->whereNotNull('verified_at')
             ->first();
         if (!$emailToken || $emailToken->isExpired()) {
             return $this->error('Invalid or expired email verification token', [], 401);
-        }
-        // Check if the cell phone verification token is valid
-        $cellPhoneToken = VerificationToken::where('uuid', $request->cell_phone_verification_token_uuid)
-            ->where('identifier', $request->cell_phone)
-            ->first();
-        if (!$cellPhoneToken || $cellPhoneToken->isExpired()) {
-            return $this->error('Invalid or expired cell phone verification token', [], 401);
         }
 
         $user = User::create([
@@ -56,7 +50,6 @@ class AuthController extends Controller
         ]);
 
         $emailToken->delete();
-        $cellPhoneToken->delete();
 
         return $this->success('User registered successfully', [], 201);
     }
@@ -188,9 +181,13 @@ class AuthController extends Controller
         // Compare using bcrypt check (NOT SQL)
         if (!Hash::check($code, $verificationToken->code_hash)) {
             return $this->error('Invalid verification code', [], 401);
+        } else {
+            // Mark as verified
+            $verificationToken->verified_at = now();
+            $verificationToken->save();
         }
 
-        // ✅ Valid
+        // Valid
         return $this->success('Token verified successfully', [
             'uuid' => $verificationToken->uuid,
         ], 200);
