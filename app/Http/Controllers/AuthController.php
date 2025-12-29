@@ -165,45 +165,35 @@ class AuthController extends Controller
      */
     public function verifyToken(Request $request)
     {
-        // Validate query parameters instead of request body
         $validated = $request->validate([
-            'code' => 'required|integer|digits:5',
+            'code' => 'required|digits:5',
             'uuid' => 'required|uuid',
         ]);
-    
-        $code = $validated['code'];
-        $code_hash = password_hash($code, PASSWORD_BCRYPT);
+
+        $code = (string) $validated['code'];
         $uuid = $validated['uuid'];
 
-        // $2y$12$8F9W1gWDHJZKojTtfcCAGeHvIsAmM8t98eUL9SV7O5eHoq1yM1uL6
-        // $2y$12$jJ4ehkjWSB6150czA1oBKeW34mVYWUAesPHFEjfUP7qs/F0MR82Ju
+        // Find by UUID ONLY
+        $verificationToken = VerificationToken::where('uuid', $uuid)->first();
 
-        $test_return = [
-            'code' => $code,
-            'code_hash' => $code_hash,
-            'uuid' => $uuid,
-        ];
-    
-        // Find the token for the given identifier (email)
-        $verificationToken = VerificationToken::where('code_hash', $code_hash)
-            ->where('uuid', $uuid)
-            ->first();
-    
         if (!$verificationToken) {
-            return $this->error('Token not found', $test_return, 401);
+            return $this->error('Token not found', [], 401);
         }
 
-        if($verificationToken->isExpired()) {
+        if ($verificationToken->isExpired()) {
             $verificationToken->delete();
             return $this->error('Token has expired', [], 401);
         }
 
-        // Token is valid, proceed to verify the user
-        $return = [
+        // Compare using bcrypt check (NOT SQL)
+        if (!Hash::check($code, $verificationToken->code_hash)) {
+            return $this->error('Invalid verification code', [], 401);
+        }
+
+        // ✅ Valid
+        return $this->success('Token verified successfully', [
             'uuid' => $verificationToken->uuid,
-        ];
-    
-        return $this->success('Token verified successfully', $return, 200);
+        ], 200);
     }
 
 }

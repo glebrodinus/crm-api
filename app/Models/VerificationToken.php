@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Hash;
 
 class VerificationToken extends Model
 {
@@ -36,8 +37,10 @@ class VerificationToken extends Model
                 $model->code_hash = $plainToken;
             }
 
-            // Hash the token before saving
-            $model->code_hash = password_hash($model->code_hash, PASSWORD_BCRYPT);
+            // Hash ONLY if it's not already hashed
+            if (Hash::needsRehash($model->code_hash)) {
+                $model->code_hash = Hash::make($model->code_hash);
+            }
 
             // Set expiration time using seconds
             if (empty($model->expires_at)) {
