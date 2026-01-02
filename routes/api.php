@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AccountController;
 
 // Public (unauthenticated)
 Route::post('/register', [AuthController::class, 'register']);
@@ -32,6 +33,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Post because need to send data in body
         Route::post('/delete-account', [UserController::class, 'deleteAccount']);
+    });
+
+    Route::prefix('accounts')->group(function () {
+        Route::get('/', [AccountController::class, 'index']);
+        Route::post('/', [AccountController::class, 'store']);
+        Route::get('/{account}', [AccountController::class, 'show']);
+        Route::put('/{account}', [AccountController::class, 'update']);
+        Route::delete('/{account}', [AccountController::class, 'destroy']);
     });
 
 });
