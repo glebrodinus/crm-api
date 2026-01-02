@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
 
 class Account extends Model
 {
     protected $fillable = [
         'owner_user_id',
-        'created_by_user_id',
         'name','website','city','state','zip',
         'status',
         'is_blocked','blocked_reason','blocked_at','blocked_by_user_id',
@@ -21,6 +21,16 @@ class Account extends Model
         'is_blocked' => 'boolean',
         'blocked_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Account $account) {
+            if (Auth::check()) {
+                $account->created_by_user_id = Auth::id();
+                $account->owner_user_id ??= Auth::id();
+            }
+        });
+    }
 
     public function owner(): BelongsTo
     {

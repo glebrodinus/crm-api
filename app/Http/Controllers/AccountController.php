@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Account;
+use Illuminate\Support\Facades\Auth;
 
 class AccountController extends Controller
 {
@@ -19,7 +21,17 @@ class AccountController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'name' => 'required|string|max:50',
+        ]);
+
+        $account = Account::create($data);
+
+        if (! $account) {
+            return $this->error('Failed to create account', 500);
+        }
+
+        return $this->success('Account created successfully', $account, 201);
     }
 
     /**
