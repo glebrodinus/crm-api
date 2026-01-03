@@ -13,7 +13,13 @@ class AccountController extends Controller
      */
     public function index()
     {
-        //
+        $accounts = Account::where('owner_user_id', Auth::id())->get();
+
+        $message = $accounts->isEmpty()
+        ? 'No accounts found'
+        : 'Accounts retrieved successfully';
+
+        return $this->success($message, $accounts);
     }
 
     /**
