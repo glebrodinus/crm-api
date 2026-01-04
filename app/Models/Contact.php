@@ -6,12 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\Auth;
 
 class Contact extends Model
 {
     protected $fillable = [
-        'account_id',
-        'created_by_user_id',
         'first_name','last_name','title',
         'phone','email',
         'preferred_contact_method',
@@ -21,6 +20,15 @@ class Contact extends Model
     protected $casts = [
         'is_primary' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Contact $contact) {
+            if (Auth::check()) {
+                $contact->created_by_user_id = Auth::id();
+            }
+        });
+    }
 
     public function account(): BelongsTo
     {

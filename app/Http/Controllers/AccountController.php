@@ -26,26 +26,50 @@ class AccountController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name' => 'required|string|max:50',
-            'website' => 'nullable|string|max:255',
-            'city' => 'nullable|string|max:100',
-            'state' => 'nullable|string|max:50',
-            'zip' => 'nullable|string|max:20',
-            'status' => 'nullable|string|max:50',
-            'address' => 'nullable|string|max:255',
+            // Account fields
+            'name'      => 'required|string|max:50',
+            'website'   => 'nullable|string|max:255',
+            'city'      => 'nullable|string|max:100',
+            'state'     => 'nullable|string|max:50',
+            'zip'       => 'nullable|string|max:20',
+            'status'    => 'nullable|string|max:50',
+            'address'   => 'nullable|string|max:255',
             'address_2' => 'nullable|string|max:255',
-            'country' => 'nullable|string|max:3',
-            'phone' => 'nullable|string|max:20',
+            'country'   => 'nullable|string|max:3',
+            'phone'     => 'nullable|string|max:20',
+
+            // Optional contact fields
+            'contact_first_name' => 'nullable|string|max:50',
+            'contact_last_name'  => 'nullable|string|max:50',
+            'contact_phone'      => 'nullable|string|max:20',
+            'contact_email'      => 'nullable|email|max:255',
         ]);
 
+        // Create account
         $account = Account::create($data);
         $account->refresh();
 
         if (! $account) {
-            return $this->error('Failed to create account', 500);
+            return $this->error('Failed to create account', [], 500);
+        }
+
+        if (! empty($data['contact_first_name'])) {
+            $account->contacts()->create([
+                'first_name'         => $data['contact_first_name'],
+                'last_name'          => $data['contact_last_name'] ?? null,
+                'phone'              => $data['contact_phone'] ?? null,
+                'phone_extension'    => $data['contact_phone_extension'] ?? null,
+                'mobile'             => $data['contact_mobile'] ?? null,
+                'email'              => $data['contact_email'] ?? null,
+            ]);
+
+            if($account){
+                $account->load('contacts');
+            }
         }
 
         return $this->success('Account created successfully', $account, 201);
@@ -60,6 +84,8 @@ class AccountController extends Controller
         if (Gate::denies('view', $account)) {
             return $this->error('Account not found', [], 404);
         }
+
+        $account->load(['contacts', 'deals', 'activities', 'tasks', 'notes']);
 
         return $this->success('Account retrieved successfully', $account);
     }

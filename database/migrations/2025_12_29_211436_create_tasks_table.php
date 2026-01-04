@@ -36,10 +36,15 @@ return new class extends Migration {
 
             // Task data
             $table->enum('type', [
-                'call_back',
+                'call',
+                'quote',
                 'follow_up',
-                'send_email',
-                'check_in',
+                'email',
+                'meeting',
+                'update',
+                'invoice',
+                'payment',
+                'claim',
             ]);
 
             $table->string('title')->nullable();

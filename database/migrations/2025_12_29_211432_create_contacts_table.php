@@ -18,6 +18,8 @@ return new class extends Migration {
             $table->string('title')->nullable();
 
             $table->string('phone')->nullable();
+            $table->string('phone_extension')->nullable();
+            $table->string('mobile')->nullable();
             $table->string('email')->nullable();
 
             $table->enum('preferred_contact_method', ['call', 'email', 'text'])->nullable();

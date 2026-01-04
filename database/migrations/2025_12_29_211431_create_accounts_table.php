@@ -10,9 +10,22 @@ return new class extends Migration {
         Schema::create('accounts', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('owner_user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('created_by_user_id')->constrained('users')->cascadeOnDelete();
+            // Team ownership
+            $table->foreignId('team_id')
+                ->nullable()
+                ->constrained('teams')
+                ->nullOnDelete();
 
+            // User ownership / audit
+            $table->foreignId('owner_user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
+
+            $table->foreignId('created_by_user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
+
+            // Account info
             $table->string('name');
             $table->string('website')->nullable();
 
@@ -24,17 +37,22 @@ return new class extends Migration {
             $table->string('country', 3)->nullable()->default('USA');
             $table->string('phone')->nullable();
 
-            // relationship status
+            // Relationship status
             $table->enum('status', ['lead', 'active', 'inactive'])->default('lead');
 
-            // do-not-contact / dead
+            // Do-not-contact / blocked
             $table->boolean('is_blocked')->default(false);
             $table->text('blocked_reason')->nullable();
             $table->timestamp('blocked_at')->nullable();
-            $table->foreignId('blocked_by_user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('blocked_by_user_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
 
             $table->timestamps();
 
+            // Indexes
+            $table->index(['team_id', 'status']);
             $table->index(['owner_user_id', 'status']);
             $table->index('is_blocked');
             $table->index('name');
