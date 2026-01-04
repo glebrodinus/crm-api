@@ -30,9 +30,19 @@ class AccountController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:50',
+            'website' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:50',
+            'zip' => 'nullable|string|max:20',
+            'status' => 'nullable|string|max:50',
+            'address' => 'nullable|string|max:255',
+            'address_2' => 'nullable|string|max:255',
+            'country' => 'nullable|string|max:3',
+            'phone' => 'nullable|string|max:20',
         ]);
 
         $account = Account::create($data);
+        $account->refresh();
 
         if (! $account) {
             return $this->error('Failed to create account', 500);
@@ -57,16 +67,64 @@ class AccountController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Account $account)
     {
-        //
+        if (Gate::denies('update', $account)) {
+            return $this->error('Account not found', [], 404);
+        }
+
+        $data = $request->validate([
+            'name'    => 'required|string|max:50',
+            'website' => 'nullable|string|max:255',
+            'city'    => 'nullable|string|max:100',
+            'state'   => 'nullable|string|max:50',
+            'zip'     => 'nullable|string|max:20',
+            'status'  => 'nullable|string|max:50',
+            'address' => 'nullable|string|max:255',
+            'address_2'=> 'nullable|string|max:255',
+            'country' => 'nullable|string|max:3',
+            'phone'   => 'nullable|string|max:20',
+        ]);
+
+        // Optional security: never allow these from mass update
+        unset(
+            $data['created_by_user_id'], 
+            $data['blocked_by_user_id'], 
+            $data['blocked_at'],
+            // Recommended: do NOT allow owner change via normal update
+            $data['owner_user_id']
+        );
+
+        $account->fill($data);
+
+        if (! $account->isDirty()) {
+            return $this->success('No changes', $account);
+        }
+
+        $saved = $account->save();
+
+        if (! $saved) {
+            return $this->error('Failed to update account', [], 500);
+        }
+
+        return $this->success('Account updated successfully', $account);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Account $account)
     {
-        //
+        if (Gate::denies('delete', $account)) {
+            return $this->error('Account not found', [], 404);
+        }
+
+        $deleted = $account->delete();
+
+        if (! $deleted) {
+            return $this->error('Failed to delete account', [], 500);
+        }
+
+        return $this->success('Account deleted successfully');
     }
 }

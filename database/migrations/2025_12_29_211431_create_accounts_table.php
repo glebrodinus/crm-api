@@ -16,10 +16,13 @@ return new class extends Migration {
             $table->string('name');
             $table->string('website')->nullable();
 
-            // location (no full address; US-only)
+            $table->string('address')->nullable();
+            $table->string('address_2')->nullable();
             $table->string('city')->nullable();
             $table->string('state', 2)->nullable();
             $table->string('zip', 10)->nullable();
+            $table->string('country', 3)->nullable()->default('USA');
+            $table->string('phone')->nullable();
 
             // relationship status
             $table->enum('status', ['lead', 'active', 'inactive'])->default('lead');

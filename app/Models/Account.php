@@ -12,7 +12,7 @@ class Account extends Model
 {
     protected $fillable = [
         'owner_user_id',
-        'name','website','city','state','zip',
+        'name','website','city','state','zip', 'address','address_2','country','phone',
         'status',
         'is_blocked','blocked_reason','blocked_at','blocked_by_user_id',
     ];
