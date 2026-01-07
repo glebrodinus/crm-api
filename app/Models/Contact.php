@@ -11,8 +11,9 @@ use Illuminate\Support\Facades\Auth;
 class Contact extends Model
 {
     protected $fillable = [
+        'account_id',
         'first_name','last_name','title',
-        'phone','email',
+        'phone','phone_extension','mobile','email',
         'preferred_contact_method',
         'is_primary',
     ];
