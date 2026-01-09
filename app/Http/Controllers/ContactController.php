@@ -68,10 +68,8 @@ class ContactController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Contact $contact)
     {
-        $contact = Contact::with('account')->findOrFail($id);
-
         $this->authorize('update', $contact);
 
         $data = $request->validate([
@@ -83,24 +81,30 @@ class ContactController extends Controller
             'email'           => 'nullable|email|max:255',
         ]);
 
-        $contact->update($data);
+        $contact->fill($data);
 
-        return $this->success(
-            'Contact updated successfully',
-            $contact->refresh()
-        );
+        if (! $contact->isDirty()) {
+            return $this->success('No changes', $contact);
+        }
+
+        $contact->save();
+        $contact->refresh();
+
+        return $this->success('Contact updated successfully', $contact);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Contact $contact)
     {
-        $contact = Contact::with('account')->findOrFail($id);
-
         $this->authorize('delete', $contact);
 
-        $contact->delete();
+        $deleted = $contact->delete();
+
+        if (! $deleted) {
+            return $this->error('Failed to delete contact', [], 500);
+        }
 
         return $this->success('Contact deleted successfully');
     }

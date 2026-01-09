@@ -114,6 +114,7 @@ class AccountController extends Controller
         }
 
         $account->save();
+        $account->refresh();
 
         return $this->success('Account updated successfully', $account);
     }
@@ -125,7 +126,11 @@ class AccountController extends Controller
     {
         $this->authorize('delete', $account);
 
-        $account->delete();
+        $deleted = $account->delete();
+
+        if (! $deleted) {
+            return $this->error('Failed to delete account', [], 500);
+        }
 
         return $this->success('Account deleted successfully');
     }
