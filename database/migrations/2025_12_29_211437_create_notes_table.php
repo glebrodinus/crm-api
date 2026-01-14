@@ -17,6 +17,8 @@ return new class extends Migration {
             $table->text('body');
 
             $table->boolean('is_pinned')->default(false);
+            $table->boolean('is_private')->default(false);
+            $table->boolean('is_important')->default(false);
 
             $table->timestamps();
 

@@ -13,6 +13,8 @@ class AccountController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Account::class);
+
         $accounts = Account::where('owner_user_id', Auth::id())->get();
 
         $message = $accounts->isEmpty()
@@ -74,7 +76,13 @@ class AccountController extends Controller
     {
         $this->authorize('view', $account);
 
-        $account->load(['contacts', 'deals', 'activities', 'tasks', 'notes']);
+        $account->load([
+            'contacts',
+            'deals',
+            'activities',
+            'tasks',
+            'notes',
+        ]);
 
         return $this->success('Account retrieved successfully', $account);
     }

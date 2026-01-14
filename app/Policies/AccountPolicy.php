@@ -22,6 +22,11 @@ class AccountPolicy
         return $account->owner_user_id === $user->id;
     }
 
+    public function viewAny(User $user): bool
+    {
+        return true;
+    }
+
     // Optional: admin override later
     // public function viewAny(User $user): bool
     // {

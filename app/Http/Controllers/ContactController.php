@@ -14,8 +14,12 @@ class ContactController extends Controller
      */
     public function index()
     {
-        $contacts = Contact::with('account')
-            ->whereHas('account', fn ($q) => $q->where('owner_user_id', Auth::id()))
+        // Authorize listing contacts (policy allows, query scopes)
+        $this->authorize('viewAny', Contact::class);
+
+        $contacts = Contact::whereHas('account', function ($q) {
+                $q->where('owner_user_id', Auth::id());
+            })
             ->get();
 
         $message = $contacts->isEmpty()

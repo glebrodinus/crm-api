@@ -3,46 +3,124 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Note;
+use App\Models\Account;
+use App\Models\Contact;
+use App\Models\Deal;
+use App\Models\Activity;
+use App\Models\Task;
 
 class NoteController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'noteable_type' => 'required|string',
+            'noteable_id'   => 'required|integer',
+            'body'          => 'required|string',
+            'is_pinned'     => 'nullable|boolean',
+            'is_private'    => 'nullable|boolean',
+            'is_important'  => 'nullable|boolean',
+        ]);
+
+        $noteableClass = $this->resolveNoteableClass($data['noteable_type']);
+        if (! $noteableClass) {
+            return $this->error('Invalid noteable_type', [], 422);
+        }
+
+        $noteable = $noteableClass::findOrFail($data['noteable_id']);
+
+        // ✅ ownership check on create (account owner only)
+        if (! $this->userOwnsNoteableAccount(Auth::id(), $noteable)) {
+            return $this->error('Unauthorized', [], 403);
+        }
+
+        $note = new Note([
+            'body'         => $data['body'],
+            'is_pinned'    => $data['is_pinned'] ?? false,
+            'is_private'   => $data['is_private'] ?? false,
+            'is_important' => $data['is_important'] ?? false,
+        ]);
+
+        $noteable->notes()->save($note);
+
+        // return only note (no relations)
+        return $this->success('Note created successfully', $note->refresh(), 201);
+    }
+
+    public function update(Request $request, Note $note)
+    {
+        // Load noteable for policy check
+        $note->load('noteable');
+
+        $this->authorize('update', $note);
+
+        $data = $request->validate([
+            'body'         => 'sometimes|required|string',
+            'is_pinned'    => 'nullable|boolean',
+            'is_private'   => 'nullable|boolean',
+            'is_important' => 'nullable|boolean',
+        ]);
+
+        // Optional: prevent changing creator
+        unset($data['created_by_user_id']);
+
+        // isDirty pattern (optional)
+        $note->fill($data);
+
+        if (! $note->isDirty()) {
+            return $this->success('No changes', $note);
+        }
+
+        $note->save();
+
+        return $this->success('Note updated successfully', $note->refresh());
+    }
+
+    public function destroy(Note $note)
+    {
+        $note->load('noteable');
+
+        $this->authorize('delete', $note);
+
+        if (! $note->delete()) {
+            return $this->error('Failed to delete note', [], 500);
+        }
+
+        return $this->success('Note deleted successfully');
     }
 
     /**
-     * Display the specified resource.
+     * Keep this simple: allow short aliases to avoid sending full class names.
      */
-    public function show(string $id)
+    private function resolveNoteableClass(string $type): ?string
     {
-        //
+        return match ($type) {
+            'account'  => Account::class,
+            'contact'  => Contact::class,
+            'deal'     => Deal::class,
+            'activity' => Activity::class,
+            'task'     => Task::class,
+            default    => null,
+        };
     }
 
     /**
-     * Update the specified resource in storage.
+     * Account-owner-only rule for create.
      */
-    public function update(Request $request, string $id)
+    private function userOwnsNoteableAccount(int $userId, $noteable): bool
     {
-        //
-    }
+        if ($noteable instanceof Account) {
+            return $noteable->owner_user_id === $userId;
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        if (isset($noteable->account_id)) {
+            return Account::whereKey($noteable->account_id)
+                ->where('owner_user_id', $userId)
+                ->exists();
+        }
+
+        return false;
     }
 }

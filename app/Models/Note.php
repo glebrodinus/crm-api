@@ -11,6 +11,8 @@ class Note extends Model
     protected $fillable = [
         'body',
         'is_pinned',
+        'is_private',
+        'is_important',
         'created_by_user_id',
     ];
 
