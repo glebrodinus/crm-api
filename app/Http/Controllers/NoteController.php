@@ -31,7 +31,7 @@ class NoteController extends Controller
 
         $noteable = $noteableClass::findOrFail($data['noteable_id']);
 
-        // ✅ ownership check on create (account owner only)
+        // ownership check on create (account owner only)
         if (! $this->userOwnsNoteableAccount(Auth::id(), $noteable)) {
             return $this->error('Unauthorized', [], 403);
         }
@@ -89,6 +89,22 @@ class NoteController extends Controller
         }
 
         return $this->success('Note deleted successfully');
+    }
+
+    public function indexForAccount(Account $account)
+    {
+        $this->authorize('view', $account);
+
+        $notes = $account->notes()
+            ->orderByDesc('is_pinned')
+            ->orderByDesc('created_at')
+            ->get();
+
+        $message = $notes->isEmpty()
+            ? 'No notes found'
+            : 'Notes retrieved successfully';
+
+        return $this->success($message, $notes);
     }
 
     /**

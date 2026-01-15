@@ -44,6 +44,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{account}', [AccountController::class, 'show']);
         Route::put('/{account}', [AccountController::class, 'update']);
         Route::delete('/{account}', [AccountController::class, 'destroy']);
+        // Get notes for a specific account
+        Route::get('/{account}/notes', [NoteController::class, 'indexForAccount']);
     });
 
     Route::prefix('contacts')->group(function () {
