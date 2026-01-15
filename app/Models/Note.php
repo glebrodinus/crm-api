@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Facades\Auth;
 
 class Note extends Model
 {
@@ -18,7 +19,18 @@ class Note extends Model
 
     protected $casts = [
         'is_pinned' => 'boolean',
+        'is_private' => 'boolean',
+        'is_important' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Note $note) {
+            if (!$note->created_by_user_id && Auth::check()) {
+                $note->created_by_user_id = Auth::id();
+            }
+        });
+    }
 
     public function noteable(): MorphTo
     {
