@@ -24,6 +24,7 @@ class Task extends Model
     ];
 
     protected $casts = [
+        'priority' => 'integer',
         'due_at' => 'datetime',
         'completed_at' => 'datetime',
     ];

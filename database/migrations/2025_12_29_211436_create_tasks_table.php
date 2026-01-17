@@ -48,7 +48,9 @@ return new class extends Migration {
             ]);
 
             $table->string('title')->nullable();
-            $table->enum('priority', ['low', 'normal', 'high'])->default('normal');
+            $table->tinyInteger('priority')->default(1); // 1 (low) to 4 (high)
+
+            $table->text('note')->nullable();
 
             $table->timestamp('due_at');
 

@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->enum('type', ['call', 'email', 'text', 'meeting']);
             $table->string('outcome')->nullable();   // no_answer, voicemail, connected, etc.
             $table->string('subject')->nullable();
-            $table->text('body')->nullable();
+            $table->string('note')->nullable();
 
             $table->timestamp('occurred_at')->useCurrent();
 

@@ -44,6 +44,8 @@ return new class extends Migration {
             $table->string('commodity')->nullable();
             $table->integer('weight_lbs')->nullable();
 
+            $table->string('note')->nullable();
+
             $table->timestamp('closed_at')->nullable();
 
             $table->timestamps();
