@@ -123,9 +123,9 @@ class AuthController extends Controller
             // Check if user exists with this identifier
             $user = User::where('email', strtolower($request->identifier))->first();
 
-            if (!$user) {
+            if ($user) {
                 // User does not exist with this identifier
-                return $this->error('No user found with this email.', [], 404);
+                return $this->error('User already exists with this email.', [], 404);
             }
         }
 
