@@ -145,4 +145,89 @@ class UserController extends Controller
     
         return $this->success('Password changed successfully');
     }
+
+
+    public function updateName(Request $request)
+    {
+        $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+        ]);
+    
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+    
+        $user->update([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+        ]);
+    
+        return $this->success('User name updated successfully', $user);
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|string',
+            'new_password' => 'required|string|min:5',
+        ]);
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        if (!Hash::check($request->password, $user->password)) {
+            return $this->error('Current password is incorrect', [], 401);
+        }
+
+        $user->update(['password' => Hash::make($request->new_password)]);
+
+        return $this->success('Password updated successfully');
+    }
+
+    public function updateEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|unique:users,email,' . Auth::id(),
+            'token_code' => 'required|string',
+            'token_uuid' => 'required|uuid',
+        ]);
+
+        $token = VerificationToken::where('uuid', $request->token_uuid)
+            ->where('identifier', strtolower($request->email))
+            ->where('code', $request->token_code)
+            ->first();
+
+        if(!$token) {
+            return $this->error('Invalid token', [], 401);
+        }
+
+        if($token->isExpired()) {
+            return $this->error('Token has expired', [], 401);
+            $token->delete();
+        }
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $user->update(['email' => strtolower($request->email)]);
+
+        return $this->success('Email updated successfully', $user);
+    }
+
+    public function deleteAccount(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        if (!Hash::check($request->password, $user->password)) {
+            return $this->error('Password is incorrect', [], 401);
+        }
+
+        $user->delete();
+
+        return $this->success('User deleted successfully');
+    }
 }

@@ -30,8 +30,6 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('/name', [UserController::class, 'updateName']);
             Route::put('/password', [UserController::class, 'updatePassword']);
             Route::put('/email', [UserController::class, 'updateEmail']);
-            Route::put('/phone', [UserController::class, 'updatePhone']);
-            Route::put('/cell-phone', [UserController::class, 'updateCellPhone']);
         });
 
         // Post because need to send data in body
