@@ -113,16 +113,20 @@ class AuthController extends Controller
         $validated = $request->validate([
             'identifier' => 'required',
             'delivery_method' => 'required|in:email,sms',
+            'unique_user_identifier' => 'sometimes|boolean',
         ]);
 
         // Remove any existing tokens for this identifier
         VerificationToken::where('identifier', $validated['identifier'])->delete();
 
-        $user = User::where('email', strtolower($request->identifier))->first();
+        if($request->unique_user_identifier) {
+            // Check if user exists with this identifier
+            $user = User::where('email', strtolower($request->identifier))->first();
 
-        if ($user) {
-            // User already exists with this identifier
-            return $this->error('User already exists with this email.', [], 409);
+            if (!$user) {
+                // User does not exist with this identifier
+                return $this->error('No user found with this email.', [], 404);
+            }
         }
 
         // Create a new token record
