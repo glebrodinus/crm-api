@@ -15,7 +15,7 @@ class DealQuote extends Model
         'status',
         'customer_rate','fuel_surcharge',
         'accessorials',
-        'notes',
+        'note',
         'sent_at','expires_at',
     ];
 

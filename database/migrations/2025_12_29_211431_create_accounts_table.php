@@ -58,6 +58,8 @@ return new class extends Migration {
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
+                
+            $table->string('note')->nullable();
 
             $table->timestamps();
 

@@ -16,7 +16,7 @@ class Deal extends Model
         'origin_city','origin_state','origin_zip',
         'destination_city','destination_state','destination_zip',
         'equipment_type','commodity','weight_lbs',
-        'closed_at',
+        'closed_at', 'note',
     ];
 
     protected $casts = [

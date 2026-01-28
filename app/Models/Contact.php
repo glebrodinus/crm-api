@@ -15,7 +15,7 @@ class Contact extends Model
         'first_name','last_name','title',
         'phone','phone_extension','mobile','email',
         'preferred_contact_method',
-        'is_primary',
+        'is_primary', 'note',
     ];
 
     protected $casts = [

@@ -21,6 +21,7 @@ class Task extends Model
         'due_at',
         'completed_at',
         'completed_by_user_id',
+        'note',
     ];
 
     protected $casts = [

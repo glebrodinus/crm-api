@@ -16,7 +16,7 @@ class Account extends Model
         'status',
         'is_qualified','qualified_at','qualified_by_user_id',
         'is_blocked','blocked_reason','blocked_at','blocked_by_user_id',
-        'last_contacted_at',
+        'last_contacted_at', 'note',
     ];
 
     protected $casts = [

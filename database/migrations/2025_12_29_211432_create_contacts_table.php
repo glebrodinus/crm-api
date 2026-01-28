@@ -25,6 +25,8 @@ return new class extends Migration {
             $table->enum('preferred_contact_method', ['call', 'email', 'text'])->nullable();
             $table->boolean('is_primary')->default(false);
 
+            $table->string('note')->nullable();
+
             $table->timestamps();
 
             $table->index('account_id');

@@ -24,7 +24,7 @@ return new class extends Migration {
             // store misc accessorials in JSON (tarp, permits, escorts, etc.)
             $table->json('accessorials')->nullable();
 
-            $table->text('note')->nullable();
+            $table->string('note')->nullable();
 
             $table->timestamp('sent_at')->nullable();
             $table->timestamp('expires_at')->nullable();
