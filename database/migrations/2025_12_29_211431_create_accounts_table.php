@@ -24,6 +24,8 @@ return new class extends Migration {
             $table->foreignId('created_by_user_id')
                 ->constrained('users')
                 ->cascadeOnDelete();
+            
+            $table->timestamp('last_contacted_at')->nullable();
 
             // Account info
             $table->string('name');
@@ -40,9 +42,17 @@ return new class extends Migration {
             // Relationship status
             $table->enum('status', ['lead', 'active', 'inactive'])->default('lead');
 
+            // Qualification
+            $table->boolean('is_qualified')->default(false);
+            $table->timestamp('qualified_at')->nullable();
+            $table->foreignId('qualified_by_user_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
             // Do-not-contact / blocked
             $table->boolean('is_blocked')->default(false);
-            $table->text('blocked_reason')->nullable();
+            $table->string('blocked_reason')->nullable();
             $table->timestamp('blocked_at')->nullable();
             $table->foreignId('blocked_by_user_id')
                 ->nullable()

@@ -14,12 +14,17 @@ class Account extends Model
         'owner_user_id',
         'name','website','city','state','zip', 'address','address_2','country','phone',
         'status',
+        'is_qualified','qualified_at','qualified_by_user_id',
         'is_blocked','blocked_reason','blocked_at','blocked_by_user_id',
+        'last_contacted_at',
     ];
 
     protected $casts = [
+        'is_qualified' => 'boolean',
+        'qualified_at' => 'datetime',
         'is_blocked' => 'boolean',
         'blocked_at' => 'datetime',
+        'last_contacted_at' => 'datetime',
     ];
 
     protected static function booted(): void

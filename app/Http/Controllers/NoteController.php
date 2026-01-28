@@ -61,6 +61,11 @@ class NoteController extends Controller
             'is_pinned'    => 'nullable|boolean',
             'is_private'   => 'nullable|boolean',
             'is_important' => 'nullable|boolean',
+
+            // don't allow parent changes
+            'noteable_id'   => 'prohibited',
+            'noteable_type' => 'prohibited',
+            'created_by_user_id' => 'prohibited',
         ]);
 
         // Optional: prevent changing creator
