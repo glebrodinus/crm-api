@@ -17,9 +17,18 @@ return new class extends Migration {
             $table->foreignId('created_by_user_id')->constrained('users')->cascadeOnDelete();
 
             $table->enum('type', ['call', 'email', 'text', 'meeting']);
-            $table->string('outcome')->nullable();   // no_answer, voicemail, connected, etc.
+            $table->enum('outcome', [
+                'connected',
+                'attempted',
+                'failed',
+            ])->nullable();
+            $table->boolean('voicemail_left')->default(false);
             $table->string('subject')->nullable();
             $table->string('note')->nullable();
+
+            $table->string('contact_phone')->nullable();
+            $table->string('contact_phone_extension')->nullable();
+            $table->string('contact_email')->nullable();
 
             $table->timestamp('occurred_at')->useCurrent();
 
