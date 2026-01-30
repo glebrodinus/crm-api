@@ -25,6 +25,8 @@ class Activity extends Model
         'contact_phone_extension',
         'contact_email',
 
+        'direction',
+
         'occurred_at',
     ];
 
@@ -53,17 +55,5 @@ class Activity extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by_user_id');
-    }
-
-    /* ================= Helpers ================= */
-
-    public function isConnected(): bool
-    {
-        return $this->outcome === 'connected';
-    }
-
-    public function isCall(): bool
-    {
-        return $this->type === 'call';
     }
 }
