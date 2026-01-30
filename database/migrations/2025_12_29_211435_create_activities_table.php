@@ -23,7 +23,6 @@ return new class extends Migration {
                 'failed',
             ])->nullable();
             $table->boolean('voicemail_left')->default(false);
-            $table->string('subject')->nullable();
             $table->string('note')->nullable();
 
             $table->string('contact_phone')->nullable();
