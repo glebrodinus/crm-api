@@ -18,8 +18,8 @@ return new class extends Migration {
 
             $table->enum('type', ['call', 'email', 'text', 'meeting']);
             $table->enum('outcome', [
-                'connected',
                 'attempted',
+                'connected',
                 'failed',
             ])->nullable();
             $table->boolean('voicemail_left')->default(false);
