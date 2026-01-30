@@ -31,6 +31,7 @@ return new class extends Migration {
             $table->string('contact_email')->nullable();
 
             $table->timestamp('occurred_at')->useCurrent();
+            $table->enum('direction', ['inbound', 'outbound'])->default('outbound');
 
             $table->timestamps();
 
