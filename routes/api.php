@@ -7,7 +7,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\NoteController;
-// use App\Http\Controllers\DealController;
+use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\DealController;
 
 // Public (unauthenticated)
 Route::post('/register', [AuthController::class, 'register']);
@@ -60,8 +61,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{note}', [NoteController::class, 'destroy']);
     });
 
-    Route::prefix('deals')->group(function () {
-        // Deal routes would go here
+    Route::prefix('activities')->group(function () {
+        Route::get('/', [ActivityController::class, 'index']);
+        Route::post('/', [ActivityController::class, 'store']);
+        Route::get('/{activity}', [ActivityController::class, 'show']);
+        Route::put('/{activity}', [ActivityController::class, 'update']);
+        Route::delete('/{activity}', [ActivityController::class, 'destroy']);
     });
 
 });
