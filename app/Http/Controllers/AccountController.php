@@ -46,6 +46,10 @@ class AccountController extends Controller
             'contact_last_name'  => 'nullable|string|max:50',
             'contact_phone'      => 'nullable|string|max:20',
             'contact_email'      => 'nullable|email|max:255',
+
+            // Optional initial task
+            'type'        => 'nullable|string|max:50',
+            'due_date'    => 'nullable|date',
         ]);
 
         $account = Account::create($data);
@@ -64,6 +68,15 @@ class AccountController extends Controller
             ]);
 
             $account->load('contacts');
+        }
+
+        // Optional: create first task
+        if (! empty($data['task_type']) && ! empty($data['task_due_at'])) {
+            $account->tasks()->create([
+                'type' => $data['task_type'],
+                'due_at' => $data['task_due_at'] ?? null,
+            ]);
+            $account->load('tasks');
         }
 
         return $this->success('Account created successfully', $account, 201);
