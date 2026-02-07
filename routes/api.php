@@ -9,6 +9,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\DealController;
+use App\Http\Controllers\TaskController;
 
 // Public (unauthenticated)
 Route::post('/register', [AuthController::class, 'register']);
@@ -67,6 +68,22 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{activity}', [ActivityController::class, 'show']);
         Route::put('/{activity}', [ActivityController::class, 'update']);
         Route::delete('/{activity}', [ActivityController::class, 'destroy']);
+    });
+
+    Route::prefix('tasks')->group(function () {
+        Route::get('/', [TaskController::class, 'index']);
+        Route::post('/', [TaskController::class, 'store']);
+        Route::get('/{task}', [TaskController::class, 'show']);
+        Route::put('/{task}', [TaskController::class, 'update']);
+        Route::delete('/{task}', [TaskController::class, 'destroy']);
+    });
+
+    Route::prefix('deals')->group(function () {
+        Route::get('/', [DealController::class, 'index']);
+        Route::post('/', [DealController::class, 'store']);
+        Route::get('/{deal}', [DealController::class, 'show']);
+        Route::put('/{deal}', [DealController::class, 'update']);
+        Route::delete('/{deal}', [DealController::class, 'destroy']);
     });
 
 });
