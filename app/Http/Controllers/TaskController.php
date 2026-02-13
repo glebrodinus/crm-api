@@ -31,35 +31,31 @@ class TaskController extends Controller
             'contact_id' => ['nullable', 'exists:contacts,id'],
             'deal_id'    => ['nullable', 'exists:deals,id'],
 
-            'assigned_to_user_id' => ['required', 'exists:users,id'],
-
             'type' => ['required', 'in:call,quote,follow_up,email,meeting,update,invoice,payment,claim'],
             'title' => ['nullable', 'string', 'max:255'],
             'priority' => ['nullable', 'integer', 'min:1', 'max:4'],
 
             'note' => ['nullable', 'string'],
-
             'due_at' => ['required', 'date'],
-
-            // completion fields should not be sent on create (optional)
-            'completed_at' => ['nullable', 'date'],
-            'completed_by_user_id' => ['nullable', 'exists:users,id'],
         ]);
 
-        // Load account first
+        // 🔐 Load account + authorize
         $account = Account::findOrFail($data['account_id']);
-
-        // ACCOUNT OWNER CHECK (for now, later teams)
         $this->authorize('update', $account);
 
-        // If completed_at provided, completed_by_user_id must exist (default to current user)
-        if (!empty($data['completed_at']) && empty($data['completed_by_user_id'])) {
-            $data['completed_by_user_id'] = Auth::id();
-        }
+        // 🎯 Default values
+        $data['priority'] = $data['priority'] ?? 1;
 
         $task = Task::create([
             ...$data,
+
+            // NEVER trust frontend for these
             'created_by_user_id' => Auth::id(),
+            'assigned_to_user_id' => Auth::id(),
+
+            // completion defaults
+            'completed_at' => null,
+            'completed_by_user_id' => null,
         ]);
 
         if (!$task) {
