@@ -86,33 +86,37 @@ class TaskController extends Controller
             'contact_id' => ['nullable', 'exists:contacts,id'],
             'deal_id'    => ['nullable', 'exists:deals,id'],
 
-            'assigned_to_user_id' => ['required', 'exists:users,id'],
-
             'type' => ['required', 'in:call,quote,follow_up,email,meeting,update,invoice,payment,claim'],
             'title' => ['nullable', 'string', 'max:255'],
             'priority' => ['nullable', 'integer', 'min:1', 'max:4'],
 
             'note' => ['nullable', 'string'],
-
             'due_at' => ['required', 'date'],
 
+            // allow UI to mark complete/uncomplete
             'completed_at' => ['nullable', 'date'],
-            'completed_by_user_id' => ['nullable', 'exists:users,id'],
         ]);
 
-        // If task is being marked completed, ensure completed_by_user_id
-        if (!empty($data['completed_at']) && empty($data['completed_by_user_id'])) {
+        // default priority if missing
+        $data['priority'] = $data['priority'] ?? $task->priority ?? 1;
+
+        // ✅ completion logic (backend-controlled)
+        if (!empty($data['completed_at'])) {
             $data['completed_by_user_id'] = Auth::id();
+        } else {
+            // if explicitly cleared/uncompleted
+            if (array_key_exists('completed_at', $data)) {
+                $data['completed_by_user_id'] = null;
+            }
         }
 
-        // If task is being un-completed, clear completed_by_user_id too
-        if (array_key_exists('completed_at', $data) && empty($data['completed_at'])) {
-            $data['completed_by_user_id'] = null;
-        }
+        // ✅ keep assignment safe (for now assign stays to current user / existing)
+        // If you want to force "always assigned to me" uncomment:
+        // $data['assigned_to_user_id'] = Auth::id();
 
         $task->update($data);
 
-        if (!$task->wasChanged()) {
+        if (! $task->wasChanged()) {
             return $this->success('No changes detected', $task);
         }
 
