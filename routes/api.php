@@ -9,7 +9,9 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\DealController;
+use App\Http\Controllers\DealQuoteController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\CarrierQuoteController;
 
 // Public (unauthenticated)
 Route::post('/register', [AuthController::class, 'register']);
@@ -79,11 +81,31 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::prefix('deals')->group(function () {
+
+        // Deals
         Route::get('/', [DealController::class, 'index']);
         Route::post('/', [DealController::class, 'store']);
         Route::get('/{deal}', [DealController::class, 'show']);
         Route::put('/{deal}', [DealController::class, 'update']);
         Route::delete('/{deal}', [DealController::class, 'destroy']);
+
+        // ===============================
+        // Customer Quotes (Deal Quotes)
+        // ===============================
+        Route::get('/{deal}/quotes', [DealQuoteController::class, 'index']);
+        Route::post('/{deal}/quotes', [DealQuoteController::class, 'store']);
+        Route::get('/{deal}/quotes/{quote}', [DealQuoteController::class, 'show']);
+        Route::put('/{deal}/quotes/{quote}', [DealQuoteController::class, 'update']);
+        Route::delete('/{deal}/quotes/{quote}', [DealQuoteController::class, 'destroy']);
+
+        // ===============================
+        // Carrier Quotes
+        // ===============================
+        Route::get('/{deal}/carrier-quotes', [CarrierQuoteController::class, 'index']);
+        Route::post('/{deal}/carrier-quotes', [CarrierQuoteController::class, 'store']);
+        Route::get('/{deal}/carrier-quotes/{carrierQuote}', [CarrierQuoteController::class, 'show']);
+        Route::put('/{deal}/carrier-quotes/{carrierQuote}', [CarrierQuoteController::class, 'update']);
+        Route::delete('/{deal}/carrier-quotes/{carrierQuote}', [CarrierQuoteController::class, 'destroy']);
     });
 
 });

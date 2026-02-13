@@ -18,11 +18,11 @@ return new class extends Migration {
                 ->default('draft');
 
             // pricing
-            $table->decimal('customer_rate', 10, 2)->nullable();
-            $table->decimal('fuel_surcharge', 10, 2)->nullable();
+            $table->decimal('customer_rate', 10, 2);
 
             // store misc accessorials in JSON (tarp, permits, escorts, etc.)
             $table->json('accessorials')->nullable();
+            $table->decimal('fuel_surcharge', 10, 2)->nullable();
 
             $table->string('note')->nullable();
 
