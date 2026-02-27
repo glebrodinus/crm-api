@@ -24,10 +24,10 @@ return new class extends Migration {
             $table->foreignId('created_by_user_id')
                 ->constrained('users')
                 ->cascadeOnDelete();
-            
+
             $table->timestamp('last_contacted_at')->nullable();
 
-            // Account info
+            // Basic info
             $table->string('name');
             $table->string('website')->nullable();
 
@@ -40,25 +40,28 @@ return new class extends Migration {
             $table->string('phone')->nullable();
 
             // Relationship status
-            $table->enum('status', ['lead', 'active', 'inactive'])->default('lead');
+            $table->enum('status', [
+                'lead',        // new prospect
+                'active',      // working / shipping
+                'inactive',    // no recent activity
+                'unreachable'  // many attempts, no contact
+            ])->default('lead');
 
-            // Qualification
-            $table->boolean('is_qualified')->default(false);
+            // Qualification system (3-state via timestamps)
             $table->timestamp('qualified_at')->nullable();
             $table->foreignId('qualified_by_user_id')
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
 
-            // Do-not-contact / blocked
-            $table->boolean('is_blocked')->default(false);
-            $table->string('blocked_reason')->nullable();
-            $table->timestamp('blocked_at')->nullable();
-            $table->foreignId('blocked_by_user_id')
+            $table->timestamp('disqualified_at')->nullable();
+            $table->foreignId('disqualified_by_user_id')
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
-                
+
+            $table->string('disqualified_reason')->nullable();
+
             $table->string('note')->nullable();
 
             $table->timestamps();
@@ -66,7 +69,8 @@ return new class extends Migration {
             // Indexes
             $table->index(['team_id', 'status']);
             $table->index(['owner_user_id', 'status']);
-            $table->index('is_blocked');
+            $table->index('qualified_at');
+            $table->index('disqualified_at');
             $table->index('name');
         });
     }

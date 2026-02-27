@@ -17,9 +17,6 @@ return new class extends Migration {
             $table->foreignId('owner_user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('created_by_user_id')->constrained('users')->cascadeOnDelete();
 
-            // only 2 pipelines forever
-            $table->enum('pipeline_type', ['cold', 'repeat']);
-
             // deal lifecycle (quote -> booked -> done/lost)
             $table->enum('status', [
                 'quote_requested',

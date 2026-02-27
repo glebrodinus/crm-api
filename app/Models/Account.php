@@ -11,20 +11,41 @@ use Illuminate\Support\Facades\Auth;
 class Account extends Model
 {
     protected $fillable = [
+        'team_id',
+
         'owner_user_id',
-        'name','website','city','state','zip', 'address','address_2','country','phone',
+        'created_by_user_id',
+
+        'last_contacted_at',
+
+        'name',
+        'website',
+
+        'address',
+        'address_2',
+        'city',
+        'state',
+        'zip',
+        'country',
+        'phone',
+
         'status',
-        'is_qualified','qualified_at','qualified_by_user_id',
-        'is_blocked','blocked_reason','blocked_at','blocked_by_user_id',
-        'last_contacted_at', 'note',
+
+        'qualified_at',
+        'qualified_by_user_id',
+
+        'disqualified_at',
+        'disqualified_by_user_id',
+        'disqualified_reason',
+
+        'note',
     ];
 
     protected $casts = [
-        'is_qualified' => 'boolean',
-        'qualified_at' => 'datetime',
-        'is_blocked' => 'boolean',
-        'blocked_at' => 'datetime',
         'last_contacted_at' => 'datetime',
+
+        'qualified_at' => 'datetime',
+        'disqualified_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -37,6 +58,11 @@ class Account extends Model
         });
     }
 
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
+
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_user_id');
@@ -47,9 +73,14 @@ class Account extends Model
         return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
-    public function blockedBy(): BelongsTo
+    public function qualifiedBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'blocked_by_user_id');
+        return $this->belongsTo(User::class, 'qualified_by_user_id');
+    }
+
+    public function disqualifiedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'disqualified_by_user_id');
     }
 
     public function contacts(): HasMany
@@ -75,5 +106,19 @@ class Account extends Model
     public function notes(): MorphMany
     {
         return $this->morphMany(Note::class, 'noteable');
+    }
+
+    /*
+     * Optional helpers (nice to have)
+     */
+
+    public function isQualified(): bool
+    {
+        return !is_null($this->qualified_at) && is_null($this->disqualified_at);
+    }
+
+    public function isDisqualified(): bool
+    {
+        return !is_null($this->disqualified_at);
     }
 }
