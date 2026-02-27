@@ -13,9 +13,11 @@ return new class extends Migration {
             $table->foreignId('account_id')->constrained('accounts')->cascadeOnDelete();
             $table->foreignId('contact_id')->nullable()->constrained('contacts')->nullOnDelete();
 
+            // audit
             $table->foreignId('owner_user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('created_by_user_id')->constrained('users')->cascadeOnDelete();
 
+            // status
             $table->enum('status', [
                 'requested',
                 'quoted',
@@ -23,6 +25,7 @@ return new class extends Migration {
                 'lost',
             ])->default('requested');
 
+            // origin/destination snapshots (synced from stops)
             $table->string('origin_city')->nullable();
             $table->string('origin_state', 2)->nullable();
             $table->string('origin_zip', 10)->nullable();
@@ -31,18 +34,22 @@ return new class extends Migration {
             $table->string('destination_state', 2)->nullable();
             $table->string('destination_zip', 10)->nullable();
 
+            // load info
             $table->string('commodity')->nullable();
             $table->integer('weight_lbs')->nullable();
 
+            // summary dates (synced from stops)
             $table->date('pickup_date')->nullable();
             $table->date('delivery_date')->nullable();
 
-            $table->json('trailer_types')->nullable();
+            // distance + rpm
+            $table->unsignedInteger('distance_miles')->nullable();
+            $table->decimal('rpm', 6, 2)->nullable();
 
             // flags
             $table->boolean('is_oversize')->default(false);
             $table->boolean('is_overweight')->default(false);
-            $table->boolean('tarp_required')->default(false);
+            $table->boolean('is_tarp_required')->default(false);
             $table->boolean('is_team')->default(false);
             $table->boolean('is_government')->default(false);
             $table->boolean('is_non_operational')->default(false);
@@ -69,6 +76,8 @@ return new class extends Migration {
 
             $table->index(['owner_user_id', 'status']);
             $table->index('account_id');
+            $table->index('pickup_date');
+            $table->index('delivery_date');
         });
     }
 

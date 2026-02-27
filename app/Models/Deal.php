@@ -32,11 +32,12 @@ class Deal extends Model
         'pickup_date',
         'delivery_date',
 
-        'trailer_types',
+        'distance_miles',
+        'rpm',
 
         'is_oversize',
         'is_overweight',
-        'tarp_required',
+        'is_tarp_required',
         'is_team',
         'is_government',
         'is_non_operational',
@@ -62,11 +63,12 @@ class Deal extends Model
         'delivery_date' => 'date',
         'closed_at' => 'datetime',
 
-        'trailer_types' => 'array',
+        'distance_miles' => 'integer',
+        'rpm' => 'decimal:2',
 
         'is_oversize' => 'boolean',
         'is_overweight' => 'boolean',
-        'tarp_required' => 'boolean',
+        'is_tarp_required' => 'boolean',
         'is_team' => 'boolean',
         'is_government' => 'boolean',
         'is_non_operational' => 'boolean',
@@ -104,9 +106,22 @@ class Deal extends Model
         return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
+    // Multi-stop info (pick / stop / drop)
     public function stops(): HasMany
     {
         return $this->hasMany(DealStop::class)->orderBy('sequence');
+    }
+
+    // Trailer types (RGN, SD, etc) stored in table
+    public function trailerTypes(): HasMany
+    {
+        return $this->hasMany(DealTrailerType::class);
+    }
+
+    // Market rates from DAT / Truckstop / etc
+    public function marketRates(): HasMany
+    {
+        return $this->hasMany(DealMarketRate::class);
     }
 
     public function quotes(): HasMany
