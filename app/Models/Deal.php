@@ -62,4 +62,9 @@ class Deal extends Model
     {
         return $this->morphMany(Note::class, 'noteable');
     }
+
+    public function carrierQuotes(): HasMany
+    {
+        return $this->hasMany(CarrierQuote::class);
+    }
 }
