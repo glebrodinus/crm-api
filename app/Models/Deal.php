@@ -36,10 +36,14 @@ class Deal extends Model
 
         'is_oversize',
         'is_overweight',
-        'needs_tarp',
+        'tarp_required',
         'is_team',
         'is_government',
         'is_non_operational',
+
+        'is_temp_required',
+        'temperature_from',
+        'temperature_to',
 
         'customer_rate',
         'carrier_rate',
@@ -62,10 +66,14 @@ class Deal extends Model
 
         'is_oversize' => 'boolean',
         'is_overweight' => 'boolean',
-        'needs_tarp' => 'boolean',
+        'tarp_required' => 'boolean',
         'is_team' => 'boolean',
         'is_government' => 'boolean',
         'is_non_operational' => 'boolean',
+
+        'is_temp_required' => 'boolean',
+        'temperature_from' => 'integer',
+        'temperature_to' => 'integer',
 
         'customer_rate' => 'decimal:2',
         'carrier_rate' => 'decimal:2',
@@ -96,6 +104,11 @@ class Deal extends Model
         return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
+    public function stops(): HasMany
+    {
+        return $this->hasMany(DealStop::class)->orderBy('sequence');
+    }
+
     public function quotes(): HasMany
     {
         return $this->hasMany(DealQuote::class);
@@ -104,11 +117,6 @@ class Deal extends Model
     public function carrierQuotes(): HasMany
     {
         return $this->hasMany(CarrierQuote::class);
-    }
-
-    public function stops(): HasMany
-    {
-        return $this->hasMany(DealStop::class)->orderBy('sequence');
     }
 
     public function activities(): HasMany

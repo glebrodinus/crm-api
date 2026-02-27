@@ -49,10 +49,14 @@ class DealController extends Controller
 
             'is_oversize' => ['nullable', 'boolean'],
             'is_overweight' => ['nullable', 'boolean'],
-            'needs_tarp' => ['nullable', 'boolean'],
+            'tarp_required' => ['nullable', 'boolean'],
             'is_team' => ['nullable', 'boolean'],
             'is_government' => ['nullable', 'boolean'],
             'is_non_operational' => ['nullable', 'boolean'],
+
+            'is_temp_required' => ['nullable', 'boolean'],
+            'temperature_from' => ['nullable', 'integer', 'min:-100', 'max:150'],
+            'temperature_to' => ['nullable', 'integer', 'min:-100', 'max:150'],
 
             'customer_rate' => ['nullable', 'numeric', 'min:0'],
             'carrier_rate' => ['nullable', 'numeric', 'min:0'],
@@ -157,10 +161,14 @@ class DealController extends Controller
 
             'is_oversize' => ['nullable', 'boolean'],
             'is_overweight' => ['nullable', 'boolean'],
-            'needs_tarp' => ['nullable', 'boolean'],
+            'tarp_required' => ['nullable', 'boolean'],
             'is_team' => ['nullable', 'boolean'],
             'is_government' => ['nullable', 'boolean'],
             'is_non_operational' => ['nullable', 'boolean'],
+
+            'is_temp_required' => ['nullable', 'boolean'],
+            'temperature_from' => ['nullable', 'integer', 'min:-100', 'max:150'],
+            'temperature_to' => ['nullable', 'integer', 'min:-100', 'max:150'],
 
             'customer_rate' => ['nullable', 'numeric', 'min:0'],
             'carrier_rate' => ['nullable', 'numeric', 'min:0'],
