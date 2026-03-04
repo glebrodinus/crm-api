@@ -13,19 +13,31 @@ class DealQuote extends Model
         'deal_id',
         'created_by_user_id',
         'status',
-        'customer_rate','fuel_surcharge',
+        'customer_rate',
+        'fuel_surcharge',
         'accessorials',
         'note',
-        'sent_at','expires_at',
+        'sent_at',
+        'expires_at',
+        'selected_at',
     ];
 
     protected $casts = [
         'accessorials' => 'array',
         'sent_at' => 'datetime',
         'expires_at' => 'datetime',
+        'selected_at' => 'datetime',
         'customer_rate' => 'decimal:2',
         'fuel_surcharge' => 'decimal:2',
     ];
+
+    // optional computed badge
+    public function getIsExpiredAttribute(): bool
+    {
+        if ($this->status !== 'sent') return false;
+        if (!$this->expires_at) return false;
+        return $this->expires_at->isPast();
+    }
 
     public function deal(): BelongsTo
     {

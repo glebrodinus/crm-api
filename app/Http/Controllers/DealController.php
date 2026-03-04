@@ -9,6 +9,7 @@ use App\Models\DealMarketRate;
 use App\Models\Account;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Soap\Sdl;
 
 class DealController extends Controller
 {
@@ -30,9 +31,8 @@ class DealController extends Controller
             'account_id' => ['required', 'exists:accounts,id'],
             'contact_id' => ['nullable', 'exists:contacts,id'],
 
-            'status' => ['nullable', 'in:requested,quoted,booked,lost'],
+            'status' => ['nullable', 'in:requested,quoted,booked,lost,cancelled'],
 
-            // snapshots (optional; can be auto-synced from stops)
             'origin_city' => ['nullable', 'string', 'max:255'],
             'origin_state' => ['nullable', 'string', 'size:2'],
             'origin_zip' => ['nullable', 'string', 'max:10'],
@@ -44,15 +44,22 @@ class DealController extends Controller
             'commodity' => ['nullable', 'string', 'max:255'],
             'weight_lbs' => ['nullable', 'integer', 'min:0'],
 
-            // summary dates (optional; can be auto-synced from stops)
-            'pickup_date' => ['nullable', 'date'],
-            'delivery_date' => ['nullable', 'date'],
+            // planned windows (optional; usually synced from stops)
+            'pickup_date_from' => ['nullable', 'date'],
+            'pickup_date_to' => ['nullable', 'date'],
+            'delivery_date_from' => ['nullable', 'date'],
+            'delivery_date_to' => ['nullable', 'date'],
 
-            // distance / rpm
+            'trip_days' => ['nullable', 'integer', 'min:0', 'max:365'],
+
+            // actual execution
+            'actual_pickup_at' => ['nullable', 'date'],
+            'actual_delivery_at' => ['nullable', 'date'],
+
             'distance_miles' => ['nullable', 'integer', 'min:0'],
-            'rpm' => ['nullable', 'numeric', 'min:0'],
 
-            // flags
+            'is_partial' => ['nullable', 'boolean'],
+            'is_non_divisible' => ['nullable', 'boolean'],
             'is_oversize' => ['nullable', 'boolean'],
             'is_overweight' => ['nullable', 'boolean'],
             'is_tarp_required' => ['nullable', 'boolean'],
@@ -60,19 +67,25 @@ class DealController extends Controller
             'is_government' => ['nullable', 'boolean'],
             'is_non_operational' => ['nullable', 'boolean'],
 
-            // temperature
             'is_temp_required' => ['nullable', 'boolean'],
             'temperature_from' => ['nullable', 'integer', 'min:-100', 'max:150'],
             'temperature_to' => ['nullable', 'integer', 'min:-100', 'max:150'],
 
-            // money
             'customer_rate' => ['nullable', 'numeric', 'min:0'],
             'carrier_rate' => ['nullable', 'numeric', 'min:0'],
+            'suggested_carrier_rate' => ['nullable', 'numeric', 'min:0'],
+
             'lost_rate' => ['nullable', 'numeric', 'min:0'],
+            'lost_reason' => ['nullable', 'string', 'max:255'],
+            'lost_at' => ['nullable', 'date'],
 
             'company_profit' => ['nullable', 'numeric'],
             'agent_profit' => ['nullable', 'numeric'],
             'agent_commission_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
+
+            // acceptance (recorded by your agent)
+            'customer_accepted_at' => ['nullable', 'date'],
+            'customer_accepted_method' => ['nullable', 'string', 'max:20'],
 
             'note' => ['nullable', 'string', 'max:255'],
             'closed_at' => ['nullable', 'date'],
@@ -103,21 +116,14 @@ class DealController extends Controller
         $account = Account::findOrFail($data['account_id']);
         $this->authorize('update', $account);
 
-        $status = $data['status'] ?? 'requested';
-
-        if ($status === 'lost' && empty($data['closed_at'])) {
-            $data['closed_at'] = now();
-        }
-        if ($status !== 'lost') {
-            $data['closed_at'] = null;
-        }
-
-        // validate temp range if temp required
+        // temp range validation
         if (!empty($data['is_temp_required']) && isset($data['temperature_from'], $data['temperature_to'])) {
             if ((int)$data['temperature_from'] > (int)$data['temperature_to']) {
                 return $this->error('Temperature from cannot be greater than temperature to.', [], 422);
             }
         }
+
+        $status = $data['status'] ?? 'requested';
 
         // Extract embedded arrays
         $stops = $data['stops'] ?? null;
@@ -126,12 +132,16 @@ class DealController extends Controller
 
         unset($data['stops'], $data['trailer_types'], $data['market_rates']);
 
-        // compute rpm if not provided
-        $data['rpm'] = $this->computeRpm(
-            $data['rpm'] ?? null,
-            $data['customer_rate'] ?? null,
-            $data['distance_miles'] ?? null
-        );
+        // acceptance recorded by agent
+        if (!empty($data['customer_accepted_at'])) {
+            $data['customer_accepted_by_user_id'] = Auth::id();
+        }
+
+        // status closure logic
+        $data = $this->applyCloseAndLostFields($data, $status);
+
+        // compute rpm snapshots
+        $data = $this->applyRpmSnapshots($data);
 
         $deal = Deal::create([
             ...$data,
@@ -155,6 +165,9 @@ class DealController extends Controller
         if (is_array($marketRates)) {
             $this->syncMarketRates($deal, $marketRates);
         }
+
+        // recompute rpm snapshots again (in case distance/rates were set, or stops updated summary dates)
+        $deal->update($this->applyRpmSnapshots($deal->fresh()->toArray()));
 
         $deal->load(['account', 'contact', 'stops', 'trailerTypes', 'marketRates']);
 
@@ -188,7 +201,7 @@ class DealController extends Controller
         $data = $request->validate([
             'contact_id' => ['nullable', 'exists:contacts,id'],
 
-            'status' => ['required', 'in:requested,quoted,booked,lost'],
+            'status' => ['required', 'in:requested,quoted,booked,lost,cancelled'],
 
             'origin_city' => ['nullable', 'string', 'max:255'],
             'origin_state' => ['nullable', 'string', 'size:2'],
@@ -201,12 +214,20 @@ class DealController extends Controller
             'commodity' => ['nullable', 'string', 'max:255'],
             'weight_lbs' => ['nullable', 'integer', 'min:0'],
 
-            'pickup_date' => ['nullable', 'date'],
-            'delivery_date' => ['nullable', 'date'],
+            'pickup_date_from' => ['nullable', 'date'],
+            'pickup_date_to' => ['nullable', 'date'],
+            'delivery_date_from' => ['nullable', 'date'],
+            'delivery_date_to' => ['nullable', 'date'],
+
+            'trip_days' => ['nullable', 'integer', 'min:0', 'max:365'],
+
+            'actual_pickup_at' => ['nullable', 'date'],
+            'actual_delivery_at' => ['nullable', 'date'],
 
             'distance_miles' => ['nullable', 'integer', 'min:0'],
-            'rpm' => ['nullable', 'numeric', 'min:0'],
 
+            'is_partial' => ['nullable', 'boolean'],
+            'is_non_divisible' => ['nullable', 'boolean'],
             'is_oversize' => ['nullable', 'boolean'],
             'is_overweight' => ['nullable', 'boolean'],
             'is_tarp_required' => ['nullable', 'boolean'],
@@ -220,11 +241,18 @@ class DealController extends Controller
 
             'customer_rate' => ['nullable', 'numeric', 'min:0'],
             'carrier_rate' => ['nullable', 'numeric', 'min:0'],
+            'suggested_carrier_rate' => ['nullable', 'numeric', 'min:0'],
+
             'lost_rate' => ['nullable', 'numeric', 'min:0'],
+            'lost_reason' => ['nullable', 'string', 'max:255'],
+            'lost_at' => ['nullable', 'date'],
 
             'company_profit' => ['nullable', 'numeric'],
             'agent_profit' => ['nullable', 'numeric'],
             'agent_commission_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
+
+            'customer_accepted_at' => ['nullable', 'date'],
+            'customer_accepted_method' => ['nullable', 'string', 'max:20'],
 
             'note' => ['nullable', 'string', 'max:255'],
             'closed_at' => ['nullable', 'date'],
@@ -250,20 +278,15 @@ class DealController extends Controller
             'market_rates.*.note' => ['nullable', 'string', 'max:255'],
         ]);
 
-        if ($data['status'] === 'lost' && empty($data['closed_at'])) {
-            $data['closed_at'] = now();
-        }
-        if ($data['status'] !== 'lost') {
-            $data['closed_at'] = null;
-        }
-
-        // validate temp range if temp required
+        // temp range validation
         $tempRequired = $request->boolean('is_temp_required', (bool)$deal->is_temp_required);
         $tempFrom = $request->input('temperature_from', $deal->temperature_from);
         $tempTo = $request->input('temperature_to', $deal->temperature_to);
         if ($tempRequired && !is_null($tempFrom) && !is_null($tempTo) && (int)$tempFrom > (int)$tempTo) {
             return $this->error('Temperature from cannot be greater than temperature to.', [], 422);
         }
+
+        $status = $data['status'];
 
         // Extract embedded arrays (only when present)
         $stops = array_key_exists('stops', $data) ? $data['stops'] : null;
@@ -272,15 +295,18 @@ class DealController extends Controller
 
         unset($data['stops'], $data['trailer_types'], $data['market_rates']);
 
-        // compute rpm if not provided
-        $customerRate = array_key_exists('customer_rate', $data) ? $data['customer_rate'] : $deal->customer_rate;
-        $distanceMiles = array_key_exists('distance_miles', $data) ? $data['distance_miles'] : $deal->distance_miles;
+        // acceptance recorded by agent
+        if (array_key_exists('customer_accepted_at', $data) && !empty($data['customer_accepted_at'])) {
+            $data['customer_accepted_by_user_id'] = Auth::id();
+        }
 
-        $data['rpm'] = $this->computeRpm(
-            $data['rpm'] ?? null,
-            $customerRate,
-            $distanceMiles
-        );
+        // status closure logic
+        $data = $this->applyCloseAndLostFields($data, $status);
+
+        // compute rpm snapshots
+        // (merge with existing deal values so rpm can be recalculated correctly)
+        $merged = array_merge($deal->toArray(), $data);
+        $data = array_merge($data, $this->applyRpmSnapshots($merged));
 
         $deal->update($data);
 
@@ -295,6 +321,10 @@ class DealController extends Controller
         if (is_array($marketRates)) {
             $this->syncMarketRates($deal, $marketRates);
         }
+
+        // refresh and ensure rpms correct after potential distance/rate updates
+        $deal->refresh();
+        $deal->update($this->applyRpmSnapshots($deal->toArray()));
 
         $deal->load(['account', 'contact', 'stops', 'trailerTypes', 'marketRates']);
 
@@ -314,17 +344,49 @@ class DealController extends Controller
         return $this->success('Deal deleted successfully');
     }
 
-    private function computeRpm($rpm, $customerRate, $distanceMiles): ?float
+    private function applyCloseAndLostFields(array $data, string $status): array
     {
-        if (!is_null($rpm)) {
-            return round((float) $rpm, 2);
+        $closedStatuses = ['lost', 'cancelled'];
+
+        if (in_array($status, $closedStatuses, true)) {
+            $data['closed_at'] = $data['closed_at'] ?? now();
+        } else {
+            $data['closed_at'] = null;
         }
 
-        if ($customerRate && $distanceMiles && (int) $distanceMiles > 0) {
-            return round(((float) $customerRate) / ((int) $distanceMiles), 2);
+        if ($status === 'lost') {
+            $data['lost_at'] = $data['lost_at'] ?? now();
+        } else {
+            // optional: clear lost fields when reopening/changing away
+            $data['lost_at'] = null;
+            $data['lost_reason'] = $data['lost_reason'] ?? null;
+            $data['lost_rate'] = $data['lost_rate'] ?? null;
         }
 
-        return null;
+        return $data;
+    }
+
+    private function applyRpmSnapshots(array $data): array
+    {
+        $distance = isset($data['distance_miles']) ? (int)$data['distance_miles'] : 0;
+
+        $customerRate = $data['customer_rate'] ?? null;
+        $carrierRate = $data['carrier_rate'] ?? null;
+        $suggestedCarrierRate = $data['suggested_carrier_rate'] ?? null;
+
+        $out = [];
+
+        if ($distance > 0) {
+            $out['customer_rpm'] = is_numeric($customerRate) ? round(((float)$customerRate) / $distance, 3) : null;
+            $out['carrier_rpm'] = is_numeric($carrierRate) ? round(((float)$carrierRate) / $distance, 3) : null;
+            $out['suggested_carrier_rpm'] = is_numeric($suggestedCarrierRate) ? round(((float)$suggestedCarrierRate) / $distance, 3) : null;
+        } else {
+            $out['customer_rpm'] = null;
+            $out['carrier_rpm'] = null;
+            $out['suggested_carrier_rpm'] = null;
+        }
+
+        return $out;
     }
 
     private function syncTrailerTypes(Deal $deal, array $types): void
@@ -406,9 +468,13 @@ class DealController extends Controller
 
         DealStop::insert($rows);
 
-        // sync summary fields for fast lists
+        // sync summary fields
         $firstPick = $deal->stops()->where('type', 'pick')->orderBy('sequence')->first();
         $lastDrop  = $deal->stops()->where('type', 'drop')->orderByDesc('sequence')->first();
+
+        // For now: stop has single "date" => window from/to is same date
+        $pickupDate = $firstPick?->date;
+        $deliveryDate = $lastDrop?->date;
 
         $deal->update([
             'origin_city' => $firstPick?->city,
@@ -419,8 +485,11 @@ class DealController extends Controller
             'destination_state' => $lastDrop?->state,
             'destination_zip' => $lastDrop?->zip,
 
-            'pickup_date' => $firstPick?->date,
-            'delivery_date' => $lastDrop?->date,
+            'pickup_date_from' => $pickupDate,
+            'pickup_date_to' => $pickupDate,
+
+            'delivery_date_from' => $deliveryDate,
+            'delivery_date_to' => $deliveryDate,
         ]);
     }
 }

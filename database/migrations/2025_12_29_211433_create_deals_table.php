@@ -23,6 +23,7 @@ return new class extends Migration {
                 'quoted',
                 'booked',
                 'lost',
+                'cancelled',
             ])->default('requested');
 
             // origin/destination snapshots (synced from stops)
@@ -38,15 +39,26 @@ return new class extends Migration {
             $table->string('commodity')->nullable();
             $table->integer('weight_lbs')->nullable();
 
-            // summary dates (synced from stops)
-            $table->date('pickup_date')->nullable();
-            $table->date('delivery_date')->nullable();
+            // planned date windows (synced from stops)
+            $table->date('pickup_date_from')->nullable();
+            $table->date('pickup_date_to')->nullable();
 
-            // distance + rpm
+            $table->date('delivery_date_from')->nullable();
+            $table->date('delivery_date_to')->nullable();
+
+            // trip duration hint
+            $table->unsignedSmallInteger('trip_days')->nullable();
+
+            // actual execution
+            $table->timestamp('actual_pickup_at')->nullable();
+            $table->timestamp('actual_delivery_at')->nullable();
+
+            // distance
             $table->unsignedInteger('distance_miles')->nullable();
-            $table->decimal('rpm', 6, 2)->nullable();
 
             // flags
+            $table->boolean('is_partial')->default(false);
+            $table->boolean('is_non_divisible')->default(false);
             $table->boolean('is_oversize')->default(false);
             $table->boolean('is_overweight')->default(false);
             $table->boolean('is_tarp_required')->default(false);
@@ -59,15 +71,37 @@ return new class extends Migration {
             $table->smallInteger('temperature_from')->nullable();
             $table->smallInteger('temperature_to')->nullable();
 
-            // money
+            // money (final snapshot)
             $table->decimal('customer_rate', 10, 2)->nullable();
             $table->decimal('carrier_rate', 10, 2)->nullable();
-            $table->decimal('lost_rate', 10, 2)->nullable();
 
+            // suggested carrier rate snapshot
+            $table->decimal('suggested_carrier_rate', 10, 2)->nullable();
+
+            // lost intel
+            $table->decimal('lost_rate', 10, 2)->nullable();
+            $table->string('lost_reason')->nullable();
+            $table->timestamp('lost_at')->nullable();
+
+            // RPM snapshots (stored in deals)
+            $table->decimal('customer_rpm', 8, 3)->nullable();
+            $table->decimal('carrier_rpm', 8, 3)->nullable();
+            $table->decimal('suggested_carrier_rpm', 8, 3)->nullable();
+
+            // profit
             $table->decimal('company_profit', 10, 2)->nullable();
             $table->decimal('agent_profit', 10, 2)->nullable();
             $table->decimal('agent_commission_percent', 5, 2)->nullable();
 
+            // acceptance recorded by your agent
+            $table->timestamp('customer_accepted_at')->nullable();
+            $table->foreignId('customer_accepted_by_user_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+            $table->string('customer_accepted_method', 20)->nullable(); // email, sms, verbal
+
+            // closure
             $table->timestamp('closed_at')->nullable();
 
             $table->string('note')->nullable();
@@ -76,8 +110,11 @@ return new class extends Migration {
 
             $table->index(['owner_user_id', 'status']);
             $table->index('account_id');
-            $table->index('pickup_date');
-            $table->index('delivery_date');
+
+            $table->index('pickup_date_from');
+            $table->index('pickup_date_to');
+            $table->index('delivery_date_from');
+            $table->index('delivery_date_to');
         });
     }
 

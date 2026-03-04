@@ -17,6 +17,8 @@ class Account extends Model
         'created_by_user_id',
 
         'last_contacted_at',
+        'last_attempted_at',
+        'last_deal_at',
 
         'name',
         'website',
@@ -31,6 +33,10 @@ class Account extends Model
 
         'status',
 
+        'is_unreachable',
+        'unreachable_at',
+        'unreachable_reason',
+
         'qualified_at',
         'qualified_by_user_id',
 
@@ -43,6 +49,11 @@ class Account extends Model
 
     protected $casts = [
         'last_contacted_at' => 'datetime',
+        'last_attempted_at' => 'datetime',
+        'last_deal_at' => 'datetime',
+
+        'is_unreachable' => 'boolean',
+        'unreachable_at' => 'datetime',
 
         'qualified_at' => 'datetime',
         'disqualified_at' => 'datetime',
@@ -108,10 +119,7 @@ class Account extends Model
         return $this->morphMany(Note::class, 'noteable');
     }
 
-    /*
-     * Optional helpers (nice to have)
-     */
-
+    // helpers
     public function isQualified(): bool
     {
         return !is_null($this->qualified_at) && is_null($this->disqualified_at);

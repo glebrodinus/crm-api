@@ -8,14 +8,14 @@ use Illuminate\Support\Facades\Auth;
 
 class AccountController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $this->authorize('viewAny', Account::class);
 
-        $accounts = Account::where('owner_user_id', Auth::id())->get();
+        $accounts = Account::query()
+            ->where('owner_user_id', Auth::id())
+            ->latest()
+            ->get();
 
         $message = $accounts->isEmpty()
             ? 'No accounts found'
@@ -24,33 +24,43 @@ class AccountController extends Controller
         return $this->success($message, $accounts);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'      => 'required|string|max:50',
-            'website'   => 'nullable|string|max:255',
-            'city'      => 'nullable|string|max:100',
-            'state'     => 'nullable|string|max:50',
-            'zip'       => 'nullable|string|max:20',
-            'status'    => 'nullable|string|max:50',
-            'address'   => 'nullable|string|max:255',
-            'address_2' => 'nullable|string|max:255',
-            'country'   => 'nullable|string|max:3',
-            'phone'     => 'nullable|string|max:20',
+            'name'      => ['required', 'string', 'max:255'],
+            'website'   => ['nullable', 'string', 'max:255'],
+            'city'      => ['nullable', 'string', 'max:100'],
+            'state'     => ['nullable', 'string', 'size:2'],
+            'zip'       => ['nullable', 'string', 'max:20'],
+            'status'    => ['nullable', 'in:lead,active,inactive'],
+            'address'   => ['nullable', 'string', 'max:255'],
+            'address_2' => ['nullable', 'string', 'max:255'],
+            'country'   => ['nullable', 'string', 'max:3'],
+            'phone'     => ['nullable', 'string', 'max:20'],
+
+            // unreachable flag (optional set on create)
+            'is_unreachable' => ['nullable', 'boolean'],
+            'unreachable_reason' => ['nullable', 'string', 'max:255'],
 
             // Optional initial contact
-            'contact_first_name' => 'nullable|string|max:50',
-            'contact_last_name'  => 'nullable|string|max:50',
-            'contact_phone'      => 'nullable|string|max:20',
-            'contact_email'      => 'nullable|email|max:255',
+            'contact_first_name' => ['nullable', 'string', 'max:50'],
+            'contact_last_name'  => ['nullable', 'string', 'max:50'],
+            'contact_phone'      => ['nullable', 'string', 'max:20'],
+            'contact_email'      => ['nullable', 'email', 'max:255'],
 
             // Optional initial task
-            'type'        => 'nullable|string|max:50',
-            'due_date'    => 'nullable|date',
+            'task_type'   => ['nullable', 'string', 'max:50'],
+            'task_due_at' => ['nullable', 'date'],
         ]);
+
+        // server-controlled fields
+        $data['owner_user_id'] = Auth::id();
+        $data['created_by_user_id'] = Auth::id();
+
+        // if unreachable set on create, stamp it
+        if (!empty($data['is_unreachable'])) {
+            $data['unreachable_at'] = now();
+        }
 
         $account = Account::create($data);
 
@@ -66,25 +76,21 @@ class AccountController extends Controller
                 'phone'      => $data['contact_phone'] ?? null,
                 'email'      => $data['contact_email'] ?? null,
             ]);
-
-            $account->load('contacts');
         }
 
         // Optional: create first task
-        if (! empty($data['task_type']) && ! empty($data['task_due_at'])) {
+        if (! empty($data['task_type'])) {
             $account->tasks()->create([
                 'type' => $data['task_type'],
                 'due_at' => $data['task_due_at'] ?? null,
             ]);
-            $account->load('tasks');
         }
+
+        $account->load(['contacts', 'tasks']);
 
         return $this->success('Account created successfully', $account, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Account $account)
     {
         $this->authorize('view', $account);
@@ -100,33 +106,56 @@ class AccountController extends Controller
         return $this->success('Account retrieved successfully', $account);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Account $account)
     {
         $this->authorize('update', $account);
 
         $data = $request->validate([
-            'name'      => 'required|string|max:50',
-            'website'   => 'nullable|string|max:255',
-            'city'      => 'nullable|string|max:100',
-            'state'     => 'nullable|string|max:50',
-            'zip'       => 'nullable|string|max:20',
-            'status'    => 'nullable|string|max:50',
-            'address'   => 'nullable|string|max:255',
-            'address_2' => 'nullable|string|max:255',
-            'country'   => 'nullable|string|max:3',
-            'phone'     => 'nullable|string|max:20',
+            'name'      => ['sometimes', 'required', 'string', 'max:255'],
+            'website'   => ['nullable', 'string', 'max:255'],
+            'city'      => ['nullable', 'string', 'max:100'],
+            'state'     => ['nullable', 'string', 'size:2'],
+            'zip'       => ['nullable', 'string', 'max:20'],
+            'status'    => ['nullable', 'in:lead,active,inactive'],
+            'address'   => ['nullable', 'string', 'max:255'],
+            'address_2' => ['nullable', 'string', 'max:255'],
+            'country'   => ['nullable', 'string', 'max:3'],
+            'phone'     => ['nullable', 'string', 'max:20'],
+
+            // unreachable toggle
+            'is_unreachable' => ['nullable', 'boolean'],
+            'unreachable_reason' => ['nullable', 'string', 'max:255'],
+
+            // optional: allow clearing reason
+            // 'unreachable_reason' => ['nullable', 'string', 'max:255'],
         ]);
 
-        // Never allow ownership or security fields to be updated here
+        // Never allow system-controlled fields to be updated here
         unset(
             $data['owner_user_id'],
             $data['created_by_user_id'],
-            $data['blocked_by_user_id'],
-            $data['blocked_at']
+            $data['last_contacted_at'],
+            $data['last_attempted_at'],
+            $data['last_deal_at'],
+            $data['qualified_at'],
+            $data['qualified_by_user_id'],
+            $data['disqualified_at'],
+            $data['disqualified_by_user_id']
         );
+
+        // handle unreachable stamps (only if field provided)
+        if (array_key_exists('is_unreachable', $data)) {
+            $isUnreachable = (bool) $data['is_unreachable'];
+
+            if ($isUnreachable && !$account->is_unreachable) {
+                $data['unreachable_at'] = now();
+            }
+
+            if (!$isUnreachable) {
+                $data['unreachable_at'] = null;
+                $data['unreachable_reason'] = null;
+            }
+        }
 
         $account->fill($data);
 
@@ -140,9 +169,6 @@ class AccountController extends Controller
         return $this->success('Account updated successfully', $account);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Account $account)
     {
         $this->authorize('delete', $account);

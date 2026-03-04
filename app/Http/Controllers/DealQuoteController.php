@@ -23,9 +23,10 @@ class DealQuoteController extends Controller
         $this->authorize('update', $deal);
 
         $data = $request->validate([
-            'status' => ['nullable', 'in:draft,sent,accepted,rejected,expired'],
+            'status' => ['nullable', 'in:draft,sent,rejected'],
 
-            'customer_rate' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
+            'customer_rate' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
+            'fuel_surcharge' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
             'accessorials' => ['nullable', 'array'],
             'note' => ['nullable', 'string', 'max:255'],
 
@@ -33,10 +34,17 @@ class DealQuoteController extends Controller
             'expires_at' => ['nullable', 'date', 'after_or_equal:sent_at'],
         ]);
 
+        $status = $data['status'] ?? 'draft';
+
+        // convenience: if sent, ensure sent_at
+        if ($status === 'sent' && empty($data['sent_at'])) {
+            $data['sent_at'] = now();
+        }
+
         $quote = $deal->quotes()->create([
             ...$data,
             'created_by_user_id' => Auth::id(),
-            'status' => $data['status'] ?? 'draft',
+            'status' => $status,
         ]);
 
         if (! $quote) {
@@ -65,29 +73,60 @@ class DealQuoteController extends Controller
             return $this->error('Quote does not belong to this deal', [], 404);
         }
 
-        $data = $request->validate([
-            'status' => ['required', 'in:draft,sent,accepted,rejected,expired'],
+        // If quote is not draft, lock edits (your rule)
+        if ($quote->status !== 'draft') {
+            return $this->error('Only draft quotes can be edited.', [], 422);
+        }
 
-            'customer_rate' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
+        $data = $request->validate([
+            'status' => ['required', 'in:draft,sent,rejected'],
+
+            'customer_rate' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
+            'fuel_surcharge' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
             'accessorials' => ['nullable', 'array'],
             'note' => ['nullable', 'string', 'max:255'],
 
             'sent_at' => ['nullable', 'date'],
             'expires_at' => ['nullable', 'date', 'after_or_equal:sent_at'],
+
+            // selecting (accepting) quote happens via selected_at
+            'select' => ['nullable', 'boolean'],
+            'customer_accepted_method' => ['nullable', 'string', 'max:20'], // email/sms/verbal
         ]);
 
-        // small convenience: if status becomes "sent" and sent_at isn't provided, set now
-        if ($data['status'] === 'sent' && empty($data['sent_at'])) {
+        $status = $data['status'];
+
+        if ($status === 'sent' && empty($data['sent_at'])) {
             $data['sent_at'] = now();
         }
 
+        // Remove non-column fields before update
+        $select = (bool)($data['select'] ?? false);
+        $acceptedMethod = $data['customer_accepted_method'] ?? null;
+        unset($data['select'], $data['customer_accepted_method']);
+
         $quote->update($data);
 
-        if (! $quote->wasChanged()) {
-            return $this->success('No changes detected', $quote);
+        // If user selected this quote as accepted:
+        if ($select) {
+            // mark all other quotes unselected
+            DealQuote::where('deal_id', $deal->id)->update(['selected_at' => null]);
+
+            // select this one
+            $quote->update(['selected_at' => now()]);
+
+            // snapshot to deal
+            $deal->update([
+                'customer_rate' => $quote->customer_rate,
+                'customer_accepted_at' => now(),
+                'customer_accepted_by_user_id' => Auth::id(),
+                'customer_accepted_method' => $acceptedMethod,
+                // optional: move to booked or keep quoted until carrier booked
+                // 'status' => 'booked',
+            ]);
         }
 
-        return $this->success('Deal quote updated successfully', $quote);
+        return $this->success('Deal quote updated successfully', $quote->fresh());
     }
 
     public function destroy(Deal $deal, DealQuote $quote)
@@ -97,6 +136,9 @@ class DealQuoteController extends Controller
         if ($quote->deal_id !== $deal->id) {
             return $this->error('Quote does not belong to this deal', [], 404);
         }
+
+        // optional: prevent deleting sent quotes
+        // if ($quote->status !== 'draft') return $this->error('Only draft quotes can be deleted.', [], 422);
 
         $deleted = $quote->delete();
 

@@ -13,14 +13,13 @@ return new class extends Migration {
             $table->foreignId('deal_id')->constrained('deals')->cascadeOnDelete();
             $table->foreignId('created_by_user_id')->constrained('users')->cascadeOnDelete();
 
-            // stage-based quotes (no version column)
-            $table->enum('status', ['draft', 'sent', 'accepted', 'rejected', 'expired'])
-                ->default('draft');
+            // only store real states
+            $table->enum('status', ['draft', 'sent', 'rejected'])->default('draft');
 
             // pricing
             $table->decimal('customer_rate', 10, 2);
 
-            // store misc accessorials in JSON (tarp, permits, escorts, etc.)
+            // JSON accessorials
             $table->json('accessorials')->nullable();
             $table->decimal('fuel_surcharge', 10, 2)->nullable();
 
@@ -29,9 +28,14 @@ return new class extends Migration {
             $table->timestamp('sent_at')->nullable();
             $table->timestamp('expires_at')->nullable();
 
+            // accepted = selected quote (timestamp)
+            $table->timestamp('selected_at')->nullable();
+
             $table->timestamps();
 
             $table->index(['deal_id', 'status']);
+            $table->index(['deal_id', 'selected_at']);
+            $table->index('expires_at');
         });
     }
 

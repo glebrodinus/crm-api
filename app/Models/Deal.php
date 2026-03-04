@@ -29,11 +29,19 @@ class Deal extends Model
         'commodity',
         'weight_lbs',
 
-        'pickup_date',
-        'delivery_date',
+        'pickup_date_from',
+        'pickup_date_to',
+        'delivery_date_from',
+        'delivery_date_to',
+
+        'trip_days',
+
+        'actual_pickup_at',
+        'actual_delivery_at',
 
         'distance_miles',
-        'rpm',
+
+        'is_partial',
 
         'is_oversize',
         'is_overweight',
@@ -48,24 +56,47 @@ class Deal extends Model
 
         'customer_rate',
         'carrier_rate',
+        'suggested_carrier_rate',
+
         'lost_rate',
+        'lost_reason',
+        'lost_at',
+
+        'customer_rpm',
+        'carrier_rpm',
+        'suggested_carrier_rpm',
 
         'company_profit',
         'agent_profit',
         'agent_commission_percent',
+
+        'customer_accepted_at',
+        'customer_accepted_by_user_id',
+        'customer_accepted_method',
 
         'closed_at',
         'note',
     ];
 
     protected $casts = [
-        'pickup_date' => 'date',
-        'delivery_date' => 'date',
+        'pickup_date_from' => 'date',
+        'pickup_date_to' => 'date',
+        'delivery_date_from' => 'date',
+        'delivery_date_to' => 'date',
+
+        'trip_days' => 'integer',
+
+        'actual_pickup_at' => 'datetime',
+        'actual_delivery_at' => 'datetime',
+
         'closed_at' => 'datetime',
+        'lost_at' => 'datetime',
+        'customer_accepted_at' => 'datetime',
 
         'distance_miles' => 'integer',
-        'rpm' => 'decimal:2',
 
+        'is_partial' => 'boolean',
+        'is_non_divisible' => 'boolean',
         'is_oversize' => 'boolean',
         'is_overweight' => 'boolean',
         'is_tarp_required' => 'boolean',
@@ -79,7 +110,13 @@ class Deal extends Model
 
         'customer_rate' => 'decimal:2',
         'carrier_rate' => 'decimal:2',
+        'suggested_carrier_rate' => 'decimal:2',
+
         'lost_rate' => 'decimal:2',
+
+        'customer_rpm' => 'decimal:3',
+        'carrier_rpm' => 'decimal:3',
+        'suggested_carrier_rpm' => 'decimal:3',
 
         'company_profit' => 'decimal:2',
         'agent_profit' => 'decimal:2',
@@ -106,19 +143,21 @@ class Deal extends Model
         return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
-    // Multi-stop info (pick / stop / drop)
+    public function customerAcceptedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'customer_accepted_by_user_id');
+    }
+
     public function stops(): HasMany
     {
         return $this->hasMany(DealStop::class)->orderBy('sequence');
     }
 
-    // Trailer types (RGN, SD, etc) stored in table
     public function trailerTypes(): HasMany
     {
         return $this->hasMany(DealTrailerType::class);
     }
 
-    // Market rates from DAT / Truckstop / etc
     public function marketRates(): HasMany
     {
         return $this->hasMany(DealMarketRate::class);

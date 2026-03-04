@@ -25,7 +25,10 @@ return new class extends Migration {
                 ->constrained('users')
                 ->cascadeOnDelete();
 
-            $table->timestamp('last_contacted_at')->nullable();
+            // Communication tracking
+            $table->timestamp('last_contacted_at')->nullable();  // last successful connection
+            $table->timestamp('last_attempted_at')->nullable();  // last outreach attempt (call/email/text)
+            $table->timestamp('last_deal_at')->nullable();       // last booked deal date (set when a deal is booked)
 
             // Basic info
             $table->string('name');
@@ -39,13 +42,17 @@ return new class extends Migration {
             $table->string('country', 3)->nullable()->default('USA');
             $table->string('phone')->nullable();
 
-            // Relationship status
+            // Relationship status (business relationship only)
             $table->enum('status', [
-                'lead',        // new prospect
-                'active',      // working / shipping
-                'inactive',    // no recent activity
-                'unreachable'  // many attempts, no contact
+                'lead',     // prospect (no booked deal yet)
+                'active',   // booked at least 1 deal
+                'inactive', // previously active, but not shipping recently
             ])->default('lead');
+
+            // Unreachable (flag, not status)
+            $table->boolean('is_unreachable')->default(false);
+            $table->timestamp('unreachable_at')->nullable();
+            $table->string('unreachable_reason')->nullable();
 
             // Qualification system (3-state via timestamps)
             $table->timestamp('qualified_at')->nullable();
@@ -69,6 +76,12 @@ return new class extends Migration {
             // Indexes
             $table->index(['team_id', 'status']);
             $table->index(['owner_user_id', 'status']);
+            $table->index('is_unreachable');
+
+            $table->index('last_contacted_at');
+            $table->index('last_attempted_at');
+            $table->index('last_deal_at');
+
             $table->index('qualified_at');
             $table->index('disqualified_at');
             $table->index('name');
