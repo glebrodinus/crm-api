@@ -14,6 +14,7 @@ class Task extends Model
         'contact_id',
         'deal_id',
         'created_by_user_id',
+        'updated_by_user_id',
         'assigned_to_user_id',
         'type',
         'title',
@@ -40,7 +41,22 @@ class Task extends Model
                 $task->assigned_to_user_id = Auth::id() ?? $task->created_by_user_id;
             }
         });
+
+        static::creating(function (Task $task) {
+            if (Auth::check()) {
+                $task->created_by_user_id ??= Auth::id();
+                $task->updated_by_user_id ??= Auth::id(); // if you have it
+            }
+        });
+
+        static::updating(function (Task $task) {
+            if (Auth::check()) {
+                $task->updated_by_user_id = Auth::id(); // if you have it
+            }
+        });
     }
+
+    
 
     public function account(): BelongsTo
     {

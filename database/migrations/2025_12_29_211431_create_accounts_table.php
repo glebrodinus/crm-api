@@ -25,6 +25,11 @@ return new class extends Migration {
                 ->constrained('users')
                 ->cascadeOnDelete();
 
+            $table->foreignId('updated_by_user_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
             // Communication tracking
             $table->timestamp('last_contacted_at')->nullable();  // last successful connection
             $table->timestamp('last_attempted_at')->nullable();  // last outreach attempt (call/email/text)

@@ -66,6 +66,13 @@ class Account extends Model
             if (Auth::check()) {
                 $account->created_by_user_id = Auth::id();
                 $account->owner_user_id ??= Auth::id();
+                $account->updated_by_user_id = Auth::id();
+            }
+        });
+
+        static::updating(function (Account $account) {
+            if (Auth::check()) {
+                $account->updated_by_user_id = Auth::id();
             }
         });
     }
