@@ -29,6 +29,7 @@ class AccountController extends Controller
         $data = $request->validate([
             'name'      => ['required', 'string', 'max:255'],
             'website'   => ['nullable', 'string', 'max:255'],
+            'email'     => ['nullable', 'email', 'max:255'],
             'city'      => ['nullable', 'string', 'max:100'],
             'state'     => ['nullable', 'string', 'size:2'],
             'zip'       => ['nullable', 'string', 'max:20'],
@@ -113,6 +114,7 @@ class AccountController extends Controller
         $data = $request->validate([
             'name'      => ['sometimes', 'required', 'string', 'max:255'],
             'website'   => ['nullable', 'string', 'max:255'],
+            'email'     => ['nullable', 'email', 'max:255'],
             'city'      => ['nullable', 'string', 'max:100'],
             'state'     => ['nullable', 'string', 'size:2'],
             'zip'       => ['nullable', 'string', 'max:20'],

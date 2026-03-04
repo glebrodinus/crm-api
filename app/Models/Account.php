@@ -22,6 +22,7 @@ class Account extends Model
 
         'name',
         'website',
+        'email',
 
         'address',
         'address_2',

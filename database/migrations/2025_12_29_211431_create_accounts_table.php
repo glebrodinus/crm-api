@@ -33,6 +33,7 @@ return new class extends Migration {
             // Basic info
             $table->string('name');
             $table->string('website')->nullable();
+            $table->string('email')->nullable();
 
             $table->string('address')->nullable();
             $table->string('address_2')->nullable();
