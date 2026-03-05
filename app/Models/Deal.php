@@ -79,10 +79,10 @@ class Deal extends Model
     ];
 
     protected $casts = [
-        'pickup_date_from' => 'date',
-        'pickup_date_to' => 'date',
-        'delivery_date_from' => 'date',
-        'delivery_date_to' => 'date',
+        'delivery_date_from' => 'date:Y-m-d',
+        'delivery_date_to' => 'date:Y-m-d',
+        'pickup_date_from' => 'date:Y-m-d',
+        'pickup_date_to' => 'date:Y-m-d',
 
         'trip_days' => 'integer',
 
