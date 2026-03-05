@@ -9,7 +9,6 @@ use App\Models\DealMarketRate;
 use App\Models\Account;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Soap\Sdl;
 
 class DealController extends Controller
 {
@@ -31,6 +30,7 @@ class DealController extends Controller
             'account_id' => ['required', 'exists:accounts,id'],
             'contact_id' => ['nullable', 'exists:contacts,id'],
 
+            // optional on create (backend defaults)
             'status' => ['nullable', 'in:requested,quoted,booked,lost,cancelled'],
 
             'origin_city' => ['nullable', 'string', 'max:255'],
@@ -140,8 +140,8 @@ class DealController extends Controller
         // status closure logic
         $data = $this->applyCloseAndLostFields($data, $status);
 
-        // compute rpm snapshots
-        $data = $this->applyRpmSnapshots($data);
+        // ✅ FIX: merge rpm snapshots (do NOT overwrite $data)
+        $data = array_merge($data, $this->applyRpmSnapshots($data));
 
         $deal = Deal::create([
             ...$data,
@@ -303,8 +303,7 @@ class DealController extends Controller
         // status closure logic
         $data = $this->applyCloseAndLostFields($data, $status);
 
-        // compute rpm snapshots
-        // (merge with existing deal values so rpm can be recalculated correctly)
+        // compute rpm snapshots (merge with existing)
         $merged = array_merge($deal->toArray(), $data);
         $data = array_merge($data, $this->applyRpmSnapshots($merged));
 
@@ -357,7 +356,7 @@ class DealController extends Controller
         if ($status === 'lost') {
             $data['lost_at'] = $data['lost_at'] ?? now();
         } else {
-            // optional: clear lost fields when reopening/changing away
+            // clear lost marker; keep intel if provided
             $data['lost_at'] = null;
             $data['lost_reason'] = $data['lost_reason'] ?? null;
             $data['lost_rate'] = $data['lost_rate'] ?? null;
