@@ -42,7 +42,7 @@ class DealController extends Controller
             'destination_zip' => ['nullable', 'string', 'max:10'],
 
             'commodity' => ['nullable', 'string', 'max:255'],
-            'weight_lbs' => ['nullable', 'integer', 'min:0'],
+            'weight' => ['nullable', 'integer', 'min:0'],
 
             // planned windows (optional; usually synced from stops)
             'pickup_date_from' => ['nullable', 'date'],
@@ -212,7 +212,7 @@ class DealController extends Controller
             'destination_zip' => ['nullable', 'string', 'max:10'],
 
             'commodity' => ['nullable', 'string', 'max:255'],
-            'weight_lbs' => ['nullable', 'integer', 'min:0'],
+            'weight' => ['nullable', 'integer', 'min:0'],
 
             'pickup_date_from' => ['nullable', 'date'],
             'pickup_date_to' => ['nullable', 'date'],

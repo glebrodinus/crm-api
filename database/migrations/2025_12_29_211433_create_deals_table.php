@@ -37,7 +37,12 @@ return new class extends Migration {
 
             // load info
             $table->string('commodity')->nullable();
-            $table->integer('weight_lbs')->nullable();
+            $table->integer('weight')->nullable(); // in lbs
+            $table->integer('length')->nullable(); // in inches
+            $table->integer('width')->nullable(); // in inches
+            $table->integer('height')->nullable(); // in inches
+            $table->integer('well_length_required')->nullable(); // in inches
+
 
             // planned date windows (synced from stops)
             $table->date('pickup_date_from')->nullable();
@@ -65,6 +70,9 @@ return new class extends Migration {
             $table->boolean('is_team')->default(false);
             $table->boolean('is_government')->default(false);
             $table->boolean('is_non_operational')->default(false);
+            $table->boolean('is_hazardous')->default(false);
+            $table->boolean('is_self_load')->default(false);
+            $table->boolean('is_self_unload')->default(false);
 
             // temperature
             $table->boolean('is_temp_required')->default(false);

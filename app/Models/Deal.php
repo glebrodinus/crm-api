@@ -27,7 +27,11 @@ class Deal extends Model
         'destination_zip',
 
         'commodity',
-        'weight_lbs',
+        'weight',
+        'length',
+        'width',
+        'height',
+        'well_length_required',
 
         'pickup_date_from',
         'pickup_date_to',
@@ -49,6 +53,10 @@ class Deal extends Model
         'is_team',
         'is_government',
         'is_non_operational',
+        'is_hazardous',
+        'is_self_load',
+        'is_self_unload',
+        'is_divisible',
 
         'is_temp_required',
         'temperature_from',
@@ -103,6 +111,9 @@ class Deal extends Model
         'is_team' => 'boolean',
         'is_government' => 'boolean',
         'is_non_operational' => 'boolean',
+        'is_hazardous' => 'boolean',
+        'is_self_load' => 'boolean',
+        'is_self_unload' => 'boolean',
 
         'is_temp_required' => 'boolean',
         'temperature_from' => 'integer',
