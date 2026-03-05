@@ -58,7 +58,7 @@ return new class extends Migration {
 
             // flags
             $table->boolean('is_partial')->default(false);
-            $table->boolean('is_non_divisible')->default(false);
+            $table->boolean('is_divisible')->default(false);
             $table->boolean('is_oversize')->default(false);
             $table->boolean('is_overweight')->default(false);
             $table->boolean('is_tarp_required')->default(false);

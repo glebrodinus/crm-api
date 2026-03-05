@@ -96,7 +96,7 @@ class Deal extends Model
         'distance_miles' => 'integer',
 
         'is_partial' => 'boolean',
-        'is_non_divisible' => 'boolean',
+        'is_divisible' => 'boolean',
         'is_oversize' => 'boolean',
         'is_overweight' => 'boolean',
         'is_tarp_required' => 'boolean',

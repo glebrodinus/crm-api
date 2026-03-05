@@ -59,7 +59,7 @@ class DealController extends Controller
             'distance_miles' => ['nullable', 'integer', 'min:0'],
 
             'is_partial' => ['nullable', 'boolean'],
-            'is_non_divisible' => ['nullable', 'boolean'],
+            'is_divisible' => ['nullable', 'boolean'],
             'is_oversize' => ['nullable', 'boolean'],
             'is_overweight' => ['nullable', 'boolean'],
             'is_tarp_required' => ['nullable', 'boolean'],
@@ -227,7 +227,7 @@ class DealController extends Controller
             'distance_miles' => ['nullable', 'integer', 'min:0'],
 
             'is_partial' => ['nullable', 'boolean'],
-            'is_non_divisible' => ['nullable', 'boolean'],
+            'is_divisible' => ['nullable', 'boolean'],
             'is_oversize' => ['nullable', 'boolean'],
             'is_overweight' => ['nullable', 'boolean'],
             'is_tarp_required' => ['nullable', 'boolean'],
