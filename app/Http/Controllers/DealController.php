@@ -43,6 +43,10 @@ class DealController extends Controller
 
             'commodity' => ['nullable', 'string', 'max:255'],
             'weight' => ['nullable', 'integer', 'min:0'],
+            'length' => ['nullable', 'integer', 'min:0'],
+            'width' => ['nullable', 'integer', 'min:0'],
+            'height' => ['nullable', 'integer', 'min:0'],
+            'well_length_required' => ['nullable', 'integer', 'min:0'],
 
             // planned windows (optional; usually synced from stops)
             'pickup_date_from' => ['nullable', 'date'],
@@ -66,6 +70,9 @@ class DealController extends Controller
             'is_team' => ['nullable', 'boolean'],
             'is_government' => ['nullable', 'boolean'],
             'is_non_operational' => ['nullable', 'boolean'],
+            'is_hazardous' => ['nullable', 'boolean'],
+            'is_self_load' => ['nullable', 'boolean'],
+            'is_self_unload' => ['nullable', 'boolean'],
 
             'is_temp_required' => ['nullable', 'boolean'],
             'temperature_from' => ['nullable', 'integer', 'min:-100', 'max:150'],
@@ -213,6 +220,10 @@ class DealController extends Controller
 
             'commodity' => ['nullable', 'string', 'max:255'],
             'weight' => ['nullable', 'integer', 'min:0'],
+            'length' => ['nullable', 'integer', 'min:0'],
+            'width' => ['nullable', 'integer', 'min:0'],
+            'height' => ['nullable', 'integer', 'min:0'],
+            'well_length_required' => ['nullable', 'integer', 'min:0'],
 
             'pickup_date_from' => ['nullable', 'date'],
             'pickup_date_to' => ['nullable', 'date'],
@@ -234,6 +245,9 @@ class DealController extends Controller
             'is_team' => ['nullable', 'boolean'],
             'is_government' => ['nullable', 'boolean'],
             'is_non_operational' => ['nullable', 'boolean'],
+            'is_hazardous' => ['nullable', 'boolean'],
+            'is_self_load' => ['nullable', 'boolean'],
+            'is_self_unload' => ['nullable', 'boolean'],
 
             'is_temp_required' => ['nullable', 'boolean'],
             'temperature_from' => ['nullable', 'integer', 'min:-100', 'max:150'],
