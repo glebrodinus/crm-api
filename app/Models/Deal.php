@@ -54,8 +54,7 @@ class Deal extends Model
         'is_government',
         'is_non_operational',
         'is_hazardous',
-        'is_self_load',
-        'is_self_unload',
+        'is_driver_assist_required',
         'is_divisible',
 
         'is_temp_required',

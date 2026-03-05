@@ -71,8 +71,7 @@ return new class extends Migration {
             $table->boolean('is_government')->default(false);
             $table->boolean('is_non_operational')->default(false);
             $table->boolean('is_hazardous')->default(false);
-            $table->boolean('is_self_load')->default(false);
-            $table->boolean('is_self_unload')->default(false);
+            $table->boolean('is_driver_assist_required')->default(false);
 
             // temperature
             $table->boolean('is_temp_required')->default(false);
