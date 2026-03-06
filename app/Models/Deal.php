@@ -56,6 +56,7 @@ class Deal extends Model
         'is_hazardous',
         'is_driver_assist_required',
         'is_divisible',
+        'is_ramps_required',
 
         'is_temp_required',
         'temperature_from',

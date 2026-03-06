@@ -14,8 +14,8 @@ return new class extends Migration {
                 ->constrained('deals')
                 ->cascadeOnDelete();
 
-            // Allowed values: RGN, F, SD, HS, R, V, CN
-            $table->enum('type', ['RGN','F','SD','HS','R','V','CN']);
+            // Allowed values: RGN, F, SD, HS, R, V, CN, PO
+            $table->enum('type', ['RGN','F','SD','HS','R','V','CN','PO']);
 
             $table->timestamps();
 
