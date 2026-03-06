@@ -88,6 +88,7 @@ class AccountController extends Controller
         }
 
         $account->load(['contacts', 'tasks']);
+        $account->refresh();
 
         return $this->success('Account created successfully', $account, 201);
     }
