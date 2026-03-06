@@ -37,6 +37,7 @@ return new class extends Migration {
 
             // Basic info
             $table->string('name');
+            $table->string('dba_name')->nullable();
             $table->string('website')->nullable();
             $table->string('email')->nullable();
 

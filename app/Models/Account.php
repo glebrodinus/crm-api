@@ -21,6 +21,7 @@ class Account extends Model
         'last_deal_at',
 
         'name',
+        'dba_name',
         'website',
         'email',
 
