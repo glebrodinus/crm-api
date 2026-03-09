@@ -17,7 +17,7 @@ class DealController extends Controller
         $this->authorize('viewAny', Deal::class);
 
         $deals = Deal::query()
-            ->where('owner_user_id', Auth::id())
+            ->where('created_by_user_id', Auth::id())
             ->latest()
             ->get();
 
@@ -147,12 +147,11 @@ class DealController extends Controller
         // status closure logic
         $data = $this->applyCloseAndLostFields($data, $status);
 
-        // ✅ FIX: merge rpm snapshots (do NOT overwrite $data)
+        // FIX: merge rpm snapshots (do NOT overwrite $data)
         $data = array_merge($data, $this->applyRpmSnapshots($data));
 
         $deal = Deal::create([
             ...$data,
-            'owner_user_id' => Auth::id(),
             'created_by_user_id' => Auth::id(),
             'status' => $status,
         ]);

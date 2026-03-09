@@ -9,7 +9,7 @@ class DealQuotePolicy
 {
     public function view(User $user, DealQuote $quote): bool
     {
-        return $quote->deal?->owner_user_id === $user->id;
+        return $quote->deal?->created_by_user_id === $user->id;
     }
 
     public function create(User $user): bool
@@ -19,11 +19,11 @@ class DealQuotePolicy
 
     public function update(User $user, DealQuote $quote): bool
     {
-        return $quote->deal?->owner_user_id === $user->id;
+        return $quote->deal?->created_by_user_id === $user->id;
     }
 
     public function delete(User $user, DealQuote $quote): bool
     {
-        return $quote->deal?->owner_user_id === $user->id;
+        return $quote->deal?->created_by_user_id === $user->id;
     }
 }

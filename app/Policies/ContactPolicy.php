@@ -20,7 +20,7 @@ class ContactPolicy
      */
     public function view(User $user, Contact $contact): bool
     {
-        return $contact->account->owner_user_id === $user->id;
+        return $contact->account->created_by_user_id === $user->id;
     }
 
     /**
@@ -37,7 +37,7 @@ class ContactPolicy
      */
     public function update(User $user, Contact $contact): bool
     {
-        return $contact->account->owner_user_id === $user->id;
+        return $contact->account->created_by_user_id === $user->id;
     }
 
     /**
@@ -45,7 +45,7 @@ class ContactPolicy
      */
     public function delete(User $user, Contact $contact): bool
     {
-        return $contact->account->owner_user_id === $user->id;
+        return $contact->account->created_by_user_id === $user->id;
     }
 
     /**
@@ -53,7 +53,7 @@ class ContactPolicy
      */
     public function restore(User $user, Contact $contact): bool
     {
-        return $contact->account->owner_user_id === $user->id;
+        return $contact->account->created_by_user_id === $user->id;
     }
 
     /**

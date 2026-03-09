@@ -13,7 +13,7 @@ class AccountController extends Controller
         $this->authorize('viewAny', Account::class);
 
         $accounts = Account::query()
-            ->where('owner_user_id', Auth::id())
+            ->where('created_by_user_id', Auth::id())
             ->latest()
             ->get();
 
@@ -56,7 +56,6 @@ class AccountController extends Controller
         ]);
 
         // server-controlled fields
-        $data['owner_user_id'] = Auth::id();
         $data['created_by_user_id'] = Auth::id();
 
         // if unreachable set on create, stamp it
@@ -137,7 +136,6 @@ class AccountController extends Controller
 
         // Never allow system-controlled fields to be updated here
         unset(
-            $data['owner_user_id'],
             $data['created_by_user_id'],
             $data['last_contacted_at'],
             $data['last_attempted_at'],

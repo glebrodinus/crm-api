@@ -12,7 +12,6 @@ class Account extends Model
 {
     protected $fillable = [
 
-        'owner_user_id',
         'created_by_user_id',
 
         'last_contacted_at',
@@ -65,7 +64,6 @@ class Account extends Model
         static::creating(function (Account $account) {
             if (Auth::check()) {
                 $account->created_by_user_id = Auth::id();
-                $account->owner_user_id ??= Auth::id();
                 $account->updated_by_user_id = Auth::id();
             }
         });
@@ -79,7 +77,7 @@ class Account extends Model
 
     public function owner(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'owner_user_id');
+        return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
     public function creator(): BelongsTo

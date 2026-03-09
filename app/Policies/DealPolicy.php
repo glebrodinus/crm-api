@@ -14,7 +14,7 @@ class DealPolicy
 
     public function view(User $user, Deal $deal): bool
     {
-        return $deal->owner_user_id === $user->id;
+        return $deal->created_by_user_id === $user->id;
     }
 
     public function create(User $user): bool
@@ -24,11 +24,11 @@ class DealPolicy
 
     public function update(User $user, Deal $deal): bool
     {
-        return $deal->owner_user_id === $user->id;
+        return $deal->created_by_user_id === $user->id;
     }
 
     public function delete(User $user, Deal $deal): bool
     {
-        return $deal->owner_user_id === $user->id;
+        return $deal->created_by_user_id === $user->id;
     }
 }

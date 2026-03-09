@@ -20,7 +20,7 @@ class ActivityPolicy
      */
     public function view(User $user, Activity $activity): bool
     {
-        return $activity->account?->owner_user_id === $user->id;
+        return $activity->account?->created_by_user_id === $user->id;
     }
 
     /**
@@ -36,7 +36,7 @@ class ActivityPolicy
      */
     public function update(User $user, Activity $activity): bool
     {
-        return $activity->account?->owner_user_id === $user->id;
+        return $activity->account?->created_by_user_id === $user->id;
     }
 
     /**
@@ -44,6 +44,6 @@ class ActivityPolicy
      */
     public function delete(User $user, Activity $activity): bool
     {
-        return $activity->account?->owner_user_id === $user->id;
+        return $activity->account?->created_by_user_id === $user->id;
     }
 }

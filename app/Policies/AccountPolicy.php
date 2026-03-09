@@ -9,17 +9,17 @@ class AccountPolicy
 {
     public function view(User $user, Account $account): bool
     {
-        return $account->owner_user_id === $user->id;
+        return $account->created_by_user_id === $user->id;
     }
 
     public function update(User $user, Account $account): bool
     {
-        return $account->owner_user_id === $user->id;
+        return $account->created_by_user_id === $user->id;
     }
 
     public function delete(User $user, Account $account): bool
     {
-        return $account->owner_user_id === $user->id;
+        return $account->created_by_user_id === $user->id;
     }
 
     public function viewAny(User $user): bool
@@ -27,9 +27,4 @@ class AccountPolicy
         return true;
     }
 
-    // Optional: admin override later
-    // public function viewAny(User $user): bool
-    // {
-    //     return true;
-    // }
 }

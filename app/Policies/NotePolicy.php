@@ -37,7 +37,7 @@ class NotePolicy
 
         // Note attached directly to an Account
         if ($noteable instanceof Account) {
-            return $noteable->owner_user_id === $user->id;
+            return $noteable->created_by_user_id === $user->id;
         }
 
         // Note attached to models that have account_id
@@ -50,7 +50,7 @@ class NotePolicy
             // assumes these models have account_id
             return (int) $noteable->account_id > 0
                 && Account::whereKey($noteable->account_id)
-                    ->where('owner_user_id', $user->id)
+                    ->where('created_by_user_id', $user->id)
                     ->exists();
         }
 

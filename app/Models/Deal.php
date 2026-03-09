@@ -13,7 +13,6 @@ class Deal extends Model
         'account_id',
         'contact_id',
 
-        'owner_user_id',
         'created_by_user_id',
 
         'status',
@@ -146,7 +145,7 @@ class Deal extends Model
 
     public function owner(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'owner_user_id');
+        return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
     public function creator(): BelongsTo

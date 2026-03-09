@@ -20,7 +20,7 @@ class CarrierQuotePolicy
      */
     public function view(User $user, CarrierQuote $carrierQuote): bool
     {
-        return $carrierQuote->deal?->owner_user_id === $user->id;
+        return $carrierQuote->deal?->created_by_user_id === $user->id;
     }
 
     /**
@@ -36,7 +36,7 @@ class CarrierQuotePolicy
      */
     public function update(User $user, CarrierQuote $carrierQuote): bool
     {
-        return $carrierQuote->deal?->owner_user_id === $user->id;
+        return $carrierQuote->deal?->created_by_user_id === $user->id;
     }
 
     /**
@@ -44,6 +44,6 @@ class CarrierQuotePolicy
      */
     public function delete(User $user, CarrierQuote $carrierQuote): bool
     {
-        return $carrierQuote->deal?->owner_user_id === $user->id;
+        return $carrierQuote->deal?->created_by_user_id === $user->id;
     }
 }

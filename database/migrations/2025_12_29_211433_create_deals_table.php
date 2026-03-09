@@ -13,8 +13,6 @@ return new class extends Migration {
             $table->foreignId('account_id')->constrained('accounts')->cascadeOnDelete();
             $table->foreignId('contact_id')->nullable()->constrained('contacts')->nullOnDelete();
 
-            // audit
-            $table->foreignId('owner_user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('created_by_user_id')->constrained('users')->cascadeOnDelete();
 
             // status
@@ -116,7 +114,7 @@ return new class extends Migration {
 
             $table->timestamps();
 
-            $table->index(['owner_user_id', 'status']);
+            $table->index(['created_by_user_id', 'status']);
             $table->index('account_id');
 
             $table->index('pickup_date_from');

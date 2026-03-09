@@ -133,12 +133,12 @@ class NoteController extends Controller
     private function userOwnsNoteableAccount(int $userId, $noteable): bool
     {
         if ($noteable instanceof Account) {
-            return $noteable->owner_user_id === $userId;
+            return $noteable->created_by_user_id === $userId;
         }
 
         if (isset($noteable->account_id)) {
             return Account::whereKey($noteable->account_id)
-                ->where('owner_user_id', $userId)
+                ->where('created_by_user_id', $userId)
                 ->exists();
         }
 

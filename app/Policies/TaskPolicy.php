@@ -14,7 +14,7 @@ class TaskPolicy
 
     public function view(User $user, Task $task): bool
     {
-        return $task->account?->owner_user_id === $user->id;
+        return $task->account?->created_by_user_id === $user->id;
     }
 
     public function create(User $user): bool
@@ -24,11 +24,11 @@ class TaskPolicy
 
     public function update(User $user, Task $task): bool
     {
-        return $task->account?->owner_user_id === $user->id;
+        return $task->account?->created_by_user_id === $user->id;
     }
 
     public function delete(User $user, Task $task): bool
     {
-        return $task->account?->owner_user_id === $user->id;
+        return $task->account?->created_by_user_id === $user->id;
     }
 }

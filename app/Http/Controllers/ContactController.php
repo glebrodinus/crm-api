@@ -18,7 +18,7 @@ class ContactController extends Controller
         $this->authorize('viewAny', Contact::class);
 
         $contacts = Contact::whereHas('account', function ($q) {
-                $q->where('owner_user_id', Auth::id());
+                $q->where('created_by_user_id', Auth::id());
             })
             ->get();
 
