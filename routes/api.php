@@ -12,6 +12,7 @@ use App\Http\Controllers\DealController;
 use App\Http\Controllers\DealQuoteController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\CarrierQuoteController;
+use App\Http\Controllers\AccountUserAccessController;
 
 // Public (unauthenticated)
 Route::post('/register', [AuthController::class, 'register']);
@@ -46,8 +47,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{account}', [AccountController::class, 'show']);
         Route::put('/{account}', [AccountController::class, 'update']);
         Route::delete('/{account}', [AccountController::class, 'destroy']);
+
         // Get notes for a specific account
         Route::get('/{account}/notes', [NoteController::class, 'indexForAccount']);
+        
+        // Account user access (sharing)
+        Route::get('/{account}/access', [AccountUserAccessController::class, 'index']);
+        Route::post('/{account}/access', [AccountUserAccessController::class, 'store']);
+        Route::put('/{account}/access/{accountUserAccess}', [AccountUserAccessController::class, 'update']);
+        Route::delete('/{account}/access/{accountUserAccess}', [AccountUserAccessController::class, 'destroy']);
     });
 
     Route::prefix('contacts')->group(function () {

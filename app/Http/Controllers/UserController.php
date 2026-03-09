@@ -213,6 +213,7 @@ class UserController extends Controller
         return $this->success('Email updated successfully', $user);
     }
 
+    // NEED TO REPLACE WITH DEACTIVATION IN THE FUTURE INSTEAD OF DELETION
     public function deleteAccount(Request $request)
     {
         $request->validate([

@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
+
 
 class Account extends Model
 {
@@ -129,5 +131,17 @@ class Account extends Model
     public function isDisqualified(): bool
     {
         return !is_null($this->disqualified_at);
+    }
+
+    public function userAccesses(): HasMany
+    {
+        return $this->hasMany(AccountUserAccess::class);
+    }
+
+    public function accessibleUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'account_user_access')
+            ->withPivot(['can_edit'])
+            ->withTimestamps();
     }
 }

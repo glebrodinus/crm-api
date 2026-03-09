@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
@@ -21,6 +23,9 @@ class User extends Authenticatable
         'phone',
         'phone_extension',
         'password',
+        'is_active',
+        'deactivated_at',
+        'deactivation_reason',
     ];
 
     /**
@@ -39,6 +44,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -50,5 +56,17 @@ class User extends Authenticatable
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
             get: fn () => "{$this->first_name} {$this->last_name}"
         );
+    }
+
+    public function accountAccesses(): HasMany
+    {
+        return $this->hasMany(AccountUserAccess::class);
+    }
+
+    public function accessibleAccounts(): BelongsToMany
+    {
+        return $this->belongsToMany(Account::class, 'account_user_access')
+            ->withPivot(['can_edit'])
+            ->withTimestamps();
     }
 }
