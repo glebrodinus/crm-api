@@ -99,11 +99,21 @@ class AccountController extends Controller
 
         $account->load([
             'contacts',
-            'deals',
+            'deals.trailerTypes:id,deal_id,type',
+            'deals.stops',
+            'deals.marketRates',
+            'deals.quotes',
+            'deals.carrierQuotes',
             'activities',
             'tasks',
             'notes',
         ]);
+
+        // Transform trailer types for each deal to a simple array of strings
+        $account->deals->each(function ($deal) {
+            $deal->trailer_types = $deal->trailerTypes->pluck('type')->values();
+            unset($deal->trailerTypes);
+        });
 
         return $this->success('Account retrieved successfully', $account);
     }

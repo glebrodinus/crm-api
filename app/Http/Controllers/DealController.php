@@ -188,7 +188,7 @@ class DealController extends Controller
             'account',
             'contact',
             'stops',
-            'trailerTypes',
+            'trailerTypes:id,deal_id,type',
             'marketRates',
             'quotes',
             'carrierQuotes',
@@ -196,6 +196,9 @@ class DealController extends Controller
             'activities',
             'notes',
         ]);
+
+        $deal->trailer_types = $deal->trailerTypes->pluck('type')->values();
+        unset($deal->trailerTypes);
 
         return $this->success('Deal retrieved successfully', $deal);
     }
