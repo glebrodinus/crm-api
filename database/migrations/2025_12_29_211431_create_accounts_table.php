@@ -10,12 +10,6 @@ return new class extends Migration {
         Schema::create('accounts', function (Blueprint $table) {
             $table->id();
 
-            // Team ownership
-            $table->foreignId('team_id')
-                ->nullable()
-                ->constrained('teams')
-                ->nullOnDelete();
-
             // User ownership / audit
             $table->foreignId('owner_user_id')
                 ->constrained('users')
@@ -81,7 +75,6 @@ return new class extends Migration {
             $table->timestamps();
 
             // Indexes
-            $table->index(['team_id', 'status']);
             $table->index(['owner_user_id', 'status']);
             $table->index('is_unreachable');
 

@@ -51,29 +51,4 @@ class User extends Authenticatable
             get: fn () => "{$this->first_name} {$this->last_name}"
         );
     }
-
-    /**
-     * Teams this user belongs to
-     */
-    public function teams()
-    {
-        return $this->belongsToMany(Team::class)
-            ->withTimestamps();
-    }
-
-    /**
-     * Team invitations sent to this user
-     */
-    public function invitations()
-    {
-        return $this->hasMany(TeamInvitation::class);
-    }
-
-    /**
-     * Team invitations sent by this user
-     */
-    public function sentTeamInvitations()
-    {
-        return $this->hasMany(TeamInvitation::class, 'invited_by_user_id');
-    }
 }

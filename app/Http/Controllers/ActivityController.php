@@ -45,7 +45,7 @@ class ActivityController extends Controller
         // Load account first
         $account = Account::findOrFail($data['account_id']);
 
-        // ACCOUNT OWNER CHECK (for now, later teams)
+        // ACCOUNT OWNER CHECK
         $this->authorize('update', $account);
 
         // Create activity

@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Auth;
 class Account extends Model
 {
     protected $fillable = [
-        'team_id',
 
         'owner_user_id',
         'created_by_user_id',
@@ -76,11 +75,6 @@ class Account extends Model
                 $account->updated_by_user_id = Auth::id();
             }
         });
-    }
-
-    public function team(): BelongsTo
-    {
-        return $this->belongsTo(Team::class);
     }
 
     public function owner(): BelongsTo
