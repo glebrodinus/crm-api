@@ -17,6 +17,7 @@ return new class extends Migration {
 
             // status
             $table->enum('status', [
+                'pending',
                 'requested',
                 'quoted',
                 'booked',
