@@ -107,6 +107,7 @@ class AccountController extends Controller
             'activities',
             'tasks',
             'notes',
+            'links',
         ]);
 
         // Transform trailer types for each deal to a simple array of strings
