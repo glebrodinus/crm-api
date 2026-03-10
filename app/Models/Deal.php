@@ -93,12 +93,12 @@ class Deal extends Model
 
         'trip_days' => 'integer',
 
-        'actual_pickup_at' => 'datetime',
-        'actual_delivery_at' => 'datetime',
+        'actual_pickup_at' => 'date:Y-m-d',
+        'actual_delivery_at' => 'date:Y-m-d',
 
-        'closed_at' => 'datetime',
-        'lost_at' => 'datetime',
-        'customer_accepted_at' => 'datetime',
+        'closed_at' => 'date:Y-m-d',
+        'lost_at' => 'date:Y-m-d',
+        'customer_accepted_at' => 'date:Y-m-d',
 
         'distance_miles' => 'integer',
 

@@ -10,7 +10,10 @@ use Illuminate\Support\Facades\Auth;
 class Note extends Model
 {
     protected $fillable = [
-        'body',
+        'type',
+        'content',
+        'url',
+        'url_label',
         'is_pinned',
         'is_private',
         'is_important',
@@ -40,5 +43,21 @@ class Note extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by_user_id');
+    }
+
+    /*
+    |--------------------------------
+    | Helpers
+    |--------------------------------
+    */
+
+    public function isNote(): bool
+    {
+        return $this->type === 'note';
+    }
+
+    public function isLink(): bool
+    {
+        return $this->type === 'link';
     }
 }

@@ -47,9 +47,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{account}', [AccountController::class, 'show']);
         Route::put('/{account}', [AccountController::class, 'update']);
         Route::delete('/{account}', [AccountController::class, 'destroy']);
-
-        // Get notes for a specific account
-        Route::get('/{account}/notes', [NoteController::class, 'indexForAccount']);
         
         // Account user access (sharing)
         Route::get('/{account}/access', [AccountUserAccessController::class, 'index']);
@@ -67,6 +64,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::prefix('notes')->group(function () {
+        Route::get('/', [NoteController::class, 'index']);
         Route::post('/', [NoteController::class, 'store']);
         Route::put('/{note}', [NoteController::class, 'update']);
         Route::delete('/{note}', [NoteController::class, 'destroy']);

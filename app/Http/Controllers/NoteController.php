@@ -13,65 +13,110 @@ use App\Models\Task;
 
 class NoteController extends Controller
 {
-    public function store(Request $request)
+    public function index(Request $request)
     {
         $data = $request->validate([
             'noteable_type' => 'required|string',
             'noteable_id'   => 'required|integer',
-            'body'          => 'required|string',
-            'is_pinned'     => 'nullable|boolean',
-            'is_private'    => 'nullable|boolean',
-            'is_important'  => 'nullable|boolean',
         ]);
 
         $noteableClass = $this->resolveNoteableClass($data['noteable_type']);
+
         if (! $noteableClass) {
             return $this->error('Invalid noteable_type', [], 422);
         }
 
         $noteable = $noteableClass::findOrFail($data['noteable_id']);
 
-        // ownership check on create (account owner only)
+        $this->authorize('view', $noteable);
+
+        $notes = $noteable->notes()
+            ->orderByDesc('is_pinned')
+            ->orderByDesc('created_at')
+            ->get();
+
+        $links = $noteable->links()
+            ->orderByDesc('is_pinned')
+            ->orderByDesc('created_at')
+            ->get();
+
+        return $this->success(
+            ucfirst($data['noteable_type']) . ' notes retrieved successfully',
+            [
+                'notes' => $notes,
+                'links' => $links,
+            ]
+        );
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'noteable_type' => 'required|string',
+            'noteable_id'   => 'required|integer',
+
+            'type'          => 'required|in:note,link',
+            'content'       => 'nullable|string|required_if:type,note',
+            'url'           => 'nullable|url|required_if:type,link',
+            'url_label'     => 'nullable|string|max:255',
+
+            'is_pinned'     => 'nullable|boolean',
+            'is_private'    => 'nullable|boolean',
+            'is_important'  => 'nullable|boolean',
+        ]);
+
+        $noteableClass = $this->resolveNoteableClass($data['noteable_type']);
+
+        if (! $noteableClass) {
+            return $this->error('Invalid noteable_type', [], 422);
+        }
+
+        $noteable = $noteableClass::findOrFail($data['noteable_id']);
+
         if (! $this->userOwnsNoteableAccount(Auth::id(), $noteable)) {
             return $this->error('Unauthorized', [], 403);
         }
 
         $note = new Note([
-            'body'         => $data['body'],
+            'type'         => $data['type'],
+            'content'      => $data['content'] ?? null,
+            'url'          => $data['url'] ?? null,
+            'url_label'    => $data['url_label'] ?? null,
             'is_pinned'    => $data['is_pinned'] ?? false,
             'is_private'   => $data['is_private'] ?? false,
             'is_important' => $data['is_important'] ?? false,
         ]);
 
-        $noteable->notes()->save($note);
+        $noteable->noteItems()->save($note);
 
-        // return only note (no relations)
-        return $this->success('Note created successfully', $note->refresh(), 201);
+        return $this->success(
+            ucfirst($note->type) . ' created successfully',
+            $note->refresh(),
+            201
+        );
     }
 
     public function update(Request $request, Note $note)
     {
-        // Load noteable for policy check
         $note->load('noteable');
 
         $this->authorize('update', $note);
 
         $data = $request->validate([
-            'body'         => 'sometimes|required|string',
+            'type'         => 'sometimes|required|in:note,link',
+            'content'      => 'nullable|string',
+            'url'          => 'nullable|url',
+            'url_label'    => 'nullable|string|max:255',
+
             'is_pinned'    => 'nullable|boolean',
             'is_private'   => 'nullable|boolean',
             'is_important' => 'nullable|boolean',
 
-            // don't allow parent changes
-            'noteable_id'   => 'prohibited',
-            'noteable_type' => 'prohibited',
+            'noteable_id'        => 'prohibited',
+            'noteable_type'      => 'prohibited',
             'created_by_user_id' => 'prohibited',
         ]);
 
-        // Optional: prevent changing creator
-        unset($data['created_by_user_id']);
-
-        // isDirty pattern (optional)
         $note->fill($data);
 
         if (! $note->isDirty()) {
@@ -80,7 +125,10 @@ class NoteController extends Controller
 
         $note->save();
 
-        return $this->success('Note updated successfully', $note->refresh());
+        return $this->success(
+            ucfirst($note->type) . ' updated successfully',
+            $note->refresh()
+        );
     }
 
     public function destroy(Note $note)
@@ -90,31 +138,14 @@ class NoteController extends Controller
         $this->authorize('delete', $note);
 
         if (! $note->delete()) {
-            return $this->error('Failed to delete note', [], 500);
+            return $this->error('Failed to delete', [], 500);
         }
 
-        return $this->success('Note deleted successfully');
+        return $this->success(
+            ucfirst($note->type) . ' deleted successfully'
+        );
     }
 
-    public function indexForAccount(Account $account)
-    {
-        $this->authorize('view', $account);
-
-        $notes = $account->notes()
-            ->orderByDesc('is_pinned')
-            ->orderByDesc('created_at')
-            ->get();
-
-        $message = $notes->isEmpty()
-            ? 'No notes found'
-            : 'Notes retrieved successfully';
-
-        return $this->success($message, $notes);
-    }
-
-    /**
-     * Keep this simple: allow short aliases to avoid sending full class names.
-     */
     private function resolveNoteableClass(string $type): ?string
     {
         return match ($type) {
@@ -127,9 +158,6 @@ class NoteController extends Controller
         };
     }
 
-    /**
-     * Account-owner-only rule for create.
-     */
     private function userOwnsNoteableAccount(int $userId, $noteable): bool
     {
         if ($noteable instanceof Account) {

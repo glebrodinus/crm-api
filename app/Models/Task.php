@@ -27,13 +27,10 @@ class Task extends Model
 
     protected $casts = [
         'priority' => 'integer',
-        'due_at' => 'datetime',
-        'completed_at' => 'datetime',
+        'due_at' => 'date:Y-m-d',
+        'completed_at' => 'date:Y-m-d',
     ];
 
-    /**
-     * Automatically assign task if not provided
-     */
     protected static function booted()
     {
         static::creating(function ($task) {
@@ -45,18 +42,16 @@ class Task extends Model
         static::creating(function (Task $task) {
             if (Auth::check()) {
                 $task->created_by_user_id ??= Auth::id();
-                $task->updated_by_user_id ??= Auth::id(); // if you have it
+                $task->updated_by_user_id ??= Auth::id();
             }
         });
 
         static::updating(function (Task $task) {
             if (Auth::check()) {
-                $task->updated_by_user_id = Auth::id(); // if you have it
+                $task->updated_by_user_id = Auth::id();
             }
         });
     }
-
-    
 
     public function account(): BelongsTo
     {
@@ -88,8 +83,20 @@ class Task extends Model
         return $this->belongsTo(User::class, 'completed_by_user_id');
     }
 
-    public function notes(): MorphMany
+    public function noteItems(): MorphMany
     {
         return $this->morphMany(Note::class, 'noteable');
+    }
+
+    public function notes(): MorphMany
+    {
+        return $this->morphMany(Note::class, 'noteable')
+            ->where('type', 'note');
+    }
+
+    public function links(): MorphMany
+    {
+        return $this->morphMany(Note::class, 'noteable')
+            ->where('type', 'link');
     }
 }

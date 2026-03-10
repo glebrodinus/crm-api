@@ -117,9 +117,21 @@ class Account extends Model
         return $this->hasMany(Task::class);
     }
 
-    public function notes(): MorphMany
+    public function allNotes(): MorphMany
     {
         return $this->morphMany(Note::class, 'noteable');
+    }
+
+    public function notes(): MorphMany
+    {
+        return $this->morphMany(Note::class, 'noteable')
+            ->where('type', 'note');
+    }
+
+    public function links(): MorphMany
+    {
+        return $this->morphMany(Note::class, 'noteable')
+            ->where('type', 'link');
     }
 
     // helpers

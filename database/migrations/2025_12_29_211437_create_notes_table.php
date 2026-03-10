@@ -13,8 +13,15 @@ return new class extends Migration {
             // noteable_type + noteable_id
             $table->morphs('noteable');
 
-            $table->foreignId('created_by_user_id')->constrained('users')->cascadeOnDelete();
-            $table->text('body');
+            $table->foreignId('created_by_user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
+
+            $table->enum('type', ['note', 'link'])->default('note');
+
+            $table->text('content')->nullable();
+            $table->text('url')->nullable();
+            $table->string('url_label')->nullable();
 
             $table->boolean('is_pinned')->default(false);
             $table->boolean('is_private')->default(false);
@@ -23,6 +30,7 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->index('created_by_user_id');
+            $table->index('type');
         });
     }
 
