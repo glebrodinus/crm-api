@@ -87,7 +87,7 @@ class NoteController extends Controller
             'is_important' => $data['is_important'] ?? false,
         ]);
 
-        $noteable->noteItems()->save($note);
+        $noteable->allNotes()->save($note);
 
         return $this->success(
             ucfirst($note->type) . ' created successfully',
