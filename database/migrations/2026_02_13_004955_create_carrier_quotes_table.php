@@ -23,7 +23,7 @@ return new class extends Migration {
             $table->string('contact_email', 255)->nullable();
 
             // Pricing
-            $table->decimal('carrier_rate', 10, 2)->nullable();
+            $table->decimal('carrier_rate', 10, 2);
 
             $table->string('note')->nullable();
 

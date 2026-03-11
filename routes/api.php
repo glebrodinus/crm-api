@@ -101,6 +101,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{deal}', [DealController::class, 'destroy']);
 
         Route::get('/{deal}/quotes', [DealQuoteController::class, 'index']);
+        Route::get('/{deal}/carrier-quotes', [CarrierQuoteController::class, 'index']);
     });
 
     Route::prefix('deal-quotes')->group(function () {
