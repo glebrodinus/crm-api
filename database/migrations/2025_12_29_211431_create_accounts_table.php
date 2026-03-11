@@ -47,6 +47,7 @@ return new class extends Migration {
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
+            $table->string('qualified_reason')->nullable();
 
             $table->timestamp('disqualified_at')->nullable();
             $table->foreignId('disqualified_by_user_id')

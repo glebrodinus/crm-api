@@ -62,10 +62,6 @@ class AccountController extends Controller
             'country'   => ['nullable', 'string', 'max:3'],
             'phone'     => ['nullable', 'string', 'max:20'],
 
-            // unreachable flag (optional set on create)
-            'is_unreachable' => ['nullable', 'boolean'],
-            'unreachable_reason' => ['nullable', 'string', 'max:255'],
-
             // Optional initial contact
             'contact_first_name' => ['nullable', 'string', 'max:50'],
             'contact_last_name'  => ['nullable', 'string', 'max:50'],
@@ -158,13 +154,6 @@ class AccountController extends Controller
             'address_2' => ['nullable', 'string', 'max:255'],
             'country'   => ['nullable', 'string', 'max:3'],
             'phone'     => ['nullable', 'string', 'max:20'],
-
-            // unreachable toggle
-            'is_unreachable' => ['nullable', 'boolean'],
-            'unreachable_reason' => ['nullable', 'string', 'max:255'],
-
-            // optional: allow clearing reason
-            // 'unreachable_reason' => ['nullable', 'string', 'max:255'],
         ]);
 
         // Never allow system-controlled fields to be updated here
@@ -203,6 +192,82 @@ class AccountController extends Controller
         $account->refresh();
 
         return $this->success('Account updated successfully', $account);
+    }
+
+    public function markReachable(Account $account)
+    {
+        $this->authorize('markReachable', $account);
+
+        if (! $account->is_unreachable) {
+            return $this->error('Account is not marked as unreachable', [], 400);
+        }
+
+        $account->is_unreachable = false;
+        $account->unreachable_at = null;
+        $account->unreachable_reason = null;
+        $account->save();
+
+        return $this->success('Account marked as reachable', $account);
+    }
+
+    public function markUnreachable(Request $request, Account $account)
+    {
+        $this->authorize('markUnreachable', $account);
+
+        $data = $request->validate([
+            'reason' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        if ($account->is_unreachable) {
+            return $this->error('Account is already marked as unreachable', [], 400);
+        }
+
+        $account->is_unreachable = true;
+        $account->unreachable_at = now();
+        $account->unreachable_reason = $data['reason'] ?? null;
+        $account->save();
+
+        return $this->success('Account marked as unreachable', $account);
+    }
+
+    public function qualify(Request $request, Account $account)
+    {
+        $this->authorize('qualify', $account);
+
+        $data = $request->validate([
+            'reason' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        if ($account->qualified_at) {
+            return $this->error('Account is already qualified', [], 400);
+        }
+
+        $account->qualified_at = now();
+        $account->qualified_by_user_id = Auth::id();
+        $account->qualified_reason = $data['reason'] ?? null;
+        $account->save();
+
+        return $this->success('Account qualified successfully', $account);
+    }
+
+    public function disqualify(Request $request, Account $account)
+    {
+        $this->authorize('disqualify', $account);
+
+        $data = $request->validate([
+            'reason' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        if ($account->disqualified_at) {
+            return $this->error('Account is already disqualified', [], 400);
+        }
+
+        $account->disqualified_at = now();
+        $account->disqualified_by_user_id = Auth::id();
+        $account->disqualified_reason = $data['reason'] ?? null;
+        $account->save();
+
+        return $this->success('Account disqualified successfully', $account);
     }
 
     public function destroy(Account $account)
