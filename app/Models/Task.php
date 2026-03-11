@@ -38,6 +38,7 @@ class Task extends Model
             if (Auth::check()) {
                 $task->created_by_user_id ??= Auth::id();
                 $task->updated_by_user_id ??= Auth::id();
+                $task->assigned_to_user_id ??= Auth::id();
             }
         });
 

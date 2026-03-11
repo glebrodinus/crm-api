@@ -54,15 +54,11 @@ class AccountController extends Controller
             // Optional initial task
             'task_type'   => ['nullable', 'string', 'max:50'],
             'task_due_at' => ['nullable', 'date'],
+
+            // Optional initial link
+            'link_label' => ['nullable', 'string', 'max:255'],
+            'link_url'   => ['nullable', 'string', 'max:2048'],
         ]);
-
-        // server-controlled fields
-        $data['created_by_user_id'] = Auth::id();
-
-        // if unreachable set on create, stamp it
-        if (!empty($data['is_unreachable'])) {
-            $data['unreachable_at'] = now();
-        }
 
         $account = Account::create($data);
 
@@ -85,6 +81,14 @@ class AccountController extends Controller
             $account->tasks()->create([
                 'type' => $data['task_type'],
                 'due_at' => $data['task_due_at'] ?? null,
+            ]);
+        }
+
+        if (! empty($data['link_url'])) {
+            $account->links()->create([
+                'type' => 'link',
+                'label' => $data['link_label'] ?? null,
+                'url' => $data['link_url'],
             ]);
         }
 
