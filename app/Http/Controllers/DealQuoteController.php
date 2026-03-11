@@ -27,11 +27,15 @@ class DealQuoteController extends Controller
             'status' => ['nullable', 'in:draft,sent,rejected'],
 
             'customer_rate' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
-            'accessorials' => ['nullable', 'array'],
+            'competitor_rate' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
+            'customer_counter_rate' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
+
             'note' => ['nullable', 'string', 'max:255'],
+            'rejected_reason' => ['nullable', 'string', 'max:255'],
 
             'sent_at' => ['nullable', 'date'],
             'expires_at' => ['nullable', 'date', 'after_or_equal:sent_at'],
+            'rejected_at' => ['nullable', 'date'],
         ]);
 
         $deal = Deal::findOrFail($data['deal_id']);
@@ -42,6 +46,10 @@ class DealQuoteController extends Controller
 
         if ($status === 'sent' && empty($data['sent_at'])) {
             $data['sent_at'] = now();
+        }
+
+        if ($status === 'rejected' && empty($data['rejected_at'])) {
+            $data['rejected_at'] = now();
         }
 
         $quote = DealQuote::create([
@@ -67,19 +75,23 @@ class DealQuoteController extends Controller
 
         $this->authorize('update', $deal);
 
-        if ($dealQuote->status !== 'draft') {
-            return $this->error('Only draft quotes can be edited.', [], 422);
+        if ($dealQuote->selected_at) {
+            return $this->error('Selected quote cannot be edited.', [], 422);
         }
 
         $data = $request->validate([
             'status' => ['required', 'in:draft,sent,rejected'],
 
             'customer_rate' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
-            'accessorials' => ['nullable', 'array'],
+            'competitor_rate' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
+            'customer_counter_rate' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
+
             'note' => ['nullable', 'string', 'max:255'],
+            'rejected_reason' => ['nullable', 'string', 'max:255'],
 
             'sent_at' => ['nullable', 'date'],
             'expires_at' => ['nullable', 'date', 'after_or_equal:sent_at'],
+            'rejected_at' => ['nullable', 'date'],
 
             'select' => ['nullable', 'boolean'],
             'customer_accepted_method' => ['nullable', 'string', 'max:20'],
@@ -88,10 +100,19 @@ class DealQuoteController extends Controller
         $status = $data['status'];
 
         if ($status === 'sent' && empty($data['sent_at'])) {
-            $data['sent_at'] = now();
+            $data['sent_at'] = $dealQuote->sent_at ?? now();
         }
 
-        $select = (bool)($data['select'] ?? false);
+        if ($status === 'rejected' && empty($data['rejected_at'])) {
+            $data['rejected_at'] = $dealQuote->rejected_at ?? now();
+        }
+
+        if ($status !== 'rejected') {
+            $data['rejected_at'] = null;
+            $data['rejected_reason'] = null;
+        }
+
+        $select = (bool) ($data['select'] ?? false);
         $acceptedMethod = $data['customer_accepted_method'] ?? null;
 
         unset($data['select'], $data['customer_accepted_method']);
@@ -99,18 +120,18 @@ class DealQuoteController extends Controller
         $dealQuote->update($data);
 
         if ($select) {
-
             DealQuote::where('deal_id', $deal->id)
                 ->update(['selected_at' => null]);
 
             $dealQuote->update([
-                'selected_at' => now()
+                'selected_at' => now(),
             ]);
 
             $deal->update([
                 'customer_rate' => $dealQuote->customer_rate,
                 'customer_accepted_at' => now(),
                 'customer_accepted_method' => $acceptedMethod,
+                'status' => 'booked',
             ]);
         }
 
@@ -122,6 +143,10 @@ class DealQuoteController extends Controller
         $deal = Deal::findOrFail($dealQuote->deal_id);
 
         $this->authorize('update', $deal);
+
+        if ($dealQuote->selected_at) {
+            return $this->error('Selected quote cannot be deleted.', [], 422);
+        }
 
         $deleted = $dealQuote->delete();
 

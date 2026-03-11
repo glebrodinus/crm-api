@@ -14,24 +14,32 @@ class DealQuote extends Model
         'deal_id',
 
         'status',
+
         'customer_rate',
-        'fuel_surcharge',
-        'accessorials',
+        'competitor_rate',
+        'customer_counter_rate',
+
         'note',
+        'rejected_reason',
+
         'sent_at',
         'expires_at',
         'selected_at',
+        'rejected_at',
+
         'created_by_user_id',
         'updated_by_user_id',
     ];
 
     protected $casts = [
-        'accessorials' => 'array',
         'sent_at' => 'datetime',
         'expires_at' => 'datetime',
         'selected_at' => 'datetime',
+        'rejected_at' => 'datetime',
+
         'customer_rate' => 'decimal:2',
-        'fuel_surcharge' => 'decimal:2',
+        'competitor_rate' => 'decimal:2',
+        'customer_counter_rate' => 'decimal:2',
     ];
 
     protected static function booted(): void
@@ -50,11 +58,16 @@ class DealQuote extends Model
         });
     }
 
-    // optional computed badge
     public function getIsExpiredAttribute(): bool
     {
-        if ($this->status !== 'sent') return false;
-        if (!$this->expires_at) return false;
+        if ($this->status !== 'sent') {
+            return false;
+        }
+
+        if (!$this->expires_at) {
+            return false;
+        }
+
         return $this->expires_at->isPast();
     }
 
@@ -66,5 +79,10 @@ class DealQuote extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by_user_id');
+    }
+
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by_user_id');
     }
 }

@@ -5,33 +5,47 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
+
     public function up(): void
     {
         Schema::create('deal_quotes', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('deal_id')->constrained('deals')->cascadeOnDelete();
+            $table->foreignId('deal_id')
+                ->constrained('deals')
+                ->cascadeOnDelete();
 
             // only store real states
-            $table->enum('status', ['draft', 'sent', 'rejected'])->default('draft');
+            $table->enum('status', ['draft', 'sent', 'rejected'])
+                ->default('draft');
 
             // pricing
             $table->decimal('customer_rate', 10, 2);
 
-            // JSON accessorials
-            $table->json('accessorials')->nullable();
-            $table->decimal('fuel_surcharge', 10, 2)->nullable();
+            // negotiation info
+            $table->decimal('competitor_rate', 10, 2)->nullable();
+            $table->decimal('customer_counter_rate', 10, 2)->nullable();
+
+            // rejection info
+            $table->timestamp('rejected_at')->nullable();
+            $table->string('rejected_reason')->nullable();
 
             $table->string('note')->nullable();
 
             $table->timestamp('sent_at')->nullable();
             $table->timestamp('expires_at')->nullable();
 
-            // accepted = selected quote (timestamp)
+            // accepted = selected quote
             $table->timestamp('selected_at')->nullable();
 
-            $table->foreignId('created_by_user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('updated_by_user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('created_by_user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
+
+            $table->foreignId('updated_by_user_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
 
             $table->timestamps();
 
