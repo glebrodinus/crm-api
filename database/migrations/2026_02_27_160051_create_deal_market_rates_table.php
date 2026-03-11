@@ -14,7 +14,7 @@ return new class extends Migration {
                 ->constrained('deals')
                 ->cascadeOnDelete();
 
-            // Open source name, ex: "DAT", "TRUCKSTOP", "SONAR", etc.
+            // Open source name, ex: "DAT", "TRUCKSTOP", etc.
             $table->string('source', 50);
 
             $table->decimal('low_rate', 10, 2)->nullable();
