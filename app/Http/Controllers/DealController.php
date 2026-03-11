@@ -31,7 +31,7 @@ class DealController extends Controller
             'contact_id' => ['nullable', 'exists:contacts,id'],
 
             // optional on create (backend defaults)
-            'status' => ['nullable', 'in:requested,quoted,booked,lost,cancelled'],
+            'status' => ['nullable', 'in:pending,requested,quoted,booked,lost,cancelled'],
 
             'origin_city' => ['nullable', 'string', 'max:255'],
             'origin_state' => ['nullable', 'string', 'size:2'],
@@ -198,7 +198,7 @@ class DealController extends Controller
         $data = $request->validate([
             'contact_id' => ['nullable', 'exists:contacts,id'],
 
-            'status' => ['required', 'in:requested,quoted,booked,lost,cancelled'],
+            'status' => ['required', 'in:pending,requested,quoted,booked,lost,cancelled'],
 
             'origin_city' => ['nullable', 'string', 'max:255'],
             'origin_state' => ['nullable', 'string', 'size:2'],
