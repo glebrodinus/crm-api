@@ -14,7 +14,13 @@ return new class extends Migration {
             $table->foreignId('contact_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('deal_id')->nullable()->constrained()->nullOnDelete();
 
-            $table->enum('type', ['call', 'email', 'text', 'meeting']);
+            $table->enum('type', [
+                'call', 
+                'email', 
+                'text', 
+                'meeting',
+                'other',
+                ]);
 
             $table->enum('outcome', [
                 'attempted',
@@ -23,7 +29,7 @@ return new class extends Migration {
                 'failed',
             ])->nullable();
 
-            $table->enum('direction', ['outbound', 'inbound'])->default('outbound');
+            $table->enum('direction', ['outbound', 'inbound'])->nullable();
 
             $table->boolean('voicemail_left')->default(false);
             $table->string('note')->nullable();

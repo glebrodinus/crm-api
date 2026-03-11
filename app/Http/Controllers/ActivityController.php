@@ -28,8 +28,8 @@ class ActivityController extends Controller
             'deal_id'    => ['nullable', 'exists:deals,id'],
 
             'type'      => ['required', 'in:call,email,text,meeting'],
-            'direction' => ['required', 'in:inbound,outbound'],
-            'outcome'   => ['nullable', 'in:connected,attempted,failed'],
+            'direction' => ['nullable', 'in:inbound,outbound'],
+            'outcome'   => ['nullable', 'in:connected,attempted,sent,failed'],
 
             'voicemail_left' => ['boolean'],
 
@@ -41,6 +41,10 @@ class ActivityController extends Controller
 
             'occurred_at' => ['required', 'date'],
         ]);
+
+        if (in_array($data['type'], ['call', 'email', 'text']) && empty($data['direction'])) {
+            return $this->error('Direction is required for call, email, and text.', [], 422);
+        }
 
         // Load account first
         $account = Account::findOrFail($data['account_id']);
@@ -81,8 +85,8 @@ class ActivityController extends Controller
 
         $data = $request->validate([
             'type'      => ['required', 'in:call,email,text,meeting'],
-            'direction' => ['required', 'in:inbound,outbound'],
-            'outcome'   => ['nullable', 'in:connected,attempted,failed'],
+            'direction' => ['nullable', 'in:inbound,outbound'],
+            'outcome'   => ['nullable', 'in:connected,attempted,sent,failed'],
 
             'voicemail_left' => ['boolean'],
 
@@ -94,6 +98,10 @@ class ActivityController extends Controller
 
             'occurred_at' => ['required', 'date'],
         ]);
+
+        if (in_array($data['type'], ['call', 'email', 'text']) && empty($data['direction'])) {
+            return $this->error('Direction is required for call, email, and text.', [], 422);
+        }
 
         $activity->update($data);
 
