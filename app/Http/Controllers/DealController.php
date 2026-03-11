@@ -107,7 +107,7 @@ class DealController extends Controller
 
             // trailer types (stored in table)
             'is_any_trailer_allowed' => ['nullable', 'boolean'],
-            'trailer_types' => ['nullable', 'array', 'min:1', 'max:7'],
+            'trailer_types' => ['nullable', 'array', 'max:7'],
             'trailer_types.*' => ['in:RGN,F,SD,HS,R,V,CN,PO'],
         ]);
 
@@ -273,7 +273,7 @@ class DealController extends Controller
             'stops.*.note' => ['nullable', 'string', 'max:255'],
 
             'is_any_trailer_allowed' => ['nullable', 'boolean'],
-            'trailer_types' => ['nullable', 'array', 'min:1', 'max:7'],
+            'trailer_types' => ['nullable', 'array', 'max:7'],
             'trailer_types.*' => ['in:RGN,F,SD,HS,R,V,CN,PO'],
         ]);
 
