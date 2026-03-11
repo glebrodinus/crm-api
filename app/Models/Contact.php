@@ -27,6 +27,13 @@ class Contact extends Model
         static::creating(function (Contact $contact) {
             if (Auth::check()) {
                 $contact->created_by_user_id = Auth::id();
+                $contact->updated_by_user_id = Auth::id();
+            }
+        });
+
+        static::updating(function (Contact $contact) {
+            if (Auth::check()) {
+                $contact->updated_by_user_id = Auth::id();
             }
         });
     }

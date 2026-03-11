@@ -14,8 +14,6 @@ return new class extends Migration {
             $table->foreignId('contact_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('deal_id')->nullable()->constrained()->nullOnDelete();
 
-            $table->foreignId('created_by_user_id')->constrained('users')->cascadeOnDelete();
-
             $table->enum('type', ['call', 'email', 'text', 'meeting']);
 
             $table->enum('outcome', [
@@ -35,6 +33,9 @@ return new class extends Migration {
             $table->string('contact_email')->nullable();
 
             $table->timestampTz('occurred_at')->useCurrent(); // store UTC
+
+            $table->foreignId('created_by_user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('updated_by_user_id')->nullable()->constrained('users')->nullOnDelete();
 
             $table->timestamps();
 

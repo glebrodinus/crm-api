@@ -11,7 +11,6 @@ return new class extends Migration {
             $table->id();
 
             $table->foreignId('account_id')->constrained('accounts')->cascadeOnDelete();
-            $table->foreignId('created_by_user_id')->constrained('users')->cascadeOnDelete();
 
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
@@ -26,6 +25,9 @@ return new class extends Migration {
             $table->boolean('is_primary')->default(false);
 
             $table->string('note')->nullable();
+
+            $table->foreignId('created_by_user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('updated_by_user_id')->nullable()->constrained('users')->nullOnDelete();
 
             $table->timestamps();
 

@@ -13,8 +13,6 @@ return new class extends Migration {
             $table->foreignId('account_id')->constrained('accounts')->cascadeOnDelete();
             $table->foreignId('contact_id')->nullable()->constrained('contacts')->nullOnDelete();
 
-            $table->foreignId('created_by_user_id')->constrained('users')->cascadeOnDelete();
-
             // status
             $table->enum('status', [
                 'pending',
@@ -112,6 +110,9 @@ return new class extends Migration {
             $table->timestamp('closed_at')->nullable();
 
             $table->string('note')->nullable();
+
+            $table->foreignId('created_by_user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('updated_by_user_id')->nullable()->constrained('users')->nullOnDelete();
 
             $table->timestamps();
 

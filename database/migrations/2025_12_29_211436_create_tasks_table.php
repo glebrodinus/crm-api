@@ -25,20 +25,6 @@ return new class extends Migration {
                 ->constrained('deals')
                 ->nullOnDelete();
 
-            // Audit + assignment
-            $table->foreignId('created_by_user_id')
-                ->constrained('users')
-                ->cascadeOnDelete();
-            
-            $table->foreignId('updated_by_user_id')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete();
-
-            $table->foreignId('assigned_to_user_id')
-                ->constrained('users')
-                ->cascadeOnDelete();
-
             // Task data
             $table->enum('type', [
                 'call',
@@ -59,12 +45,27 @@ return new class extends Migration {
 
             $table->timestamp('due_at');
 
-            // Completion
+            $table->foreignId('assigned_to_user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
+                
             $table->timestamp('completed_at')->nullable();
             $table->foreignId('completed_by_user_id')
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
+
+            $table->foreignId('created_by_user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
+            
+            $table->foreignId('updated_by_user_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+
+
 
             $table->timestamps();
 

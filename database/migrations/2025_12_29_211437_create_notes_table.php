@@ -13,10 +13,6 @@ return new class extends Migration {
             // noteable_type + noteable_id
             $table->morphs('noteable');
 
-            $table->foreignId('created_by_user_id')
-                ->constrained('users')
-                ->cascadeOnDelete();
-
             $table->enum('type', ['note', 'link'])->default('note');
 
             $table->text('content')->nullable();
@@ -26,6 +22,15 @@ return new class extends Migration {
             $table->boolean('is_pinned')->default(false);
             $table->boolean('is_private')->default(false);
             $table->boolean('is_important')->default(false);
+
+            $table->foreignId('created_by_user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
+
+            $table->foreignId('updated_by_user_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
 
             $table->timestamps();
 

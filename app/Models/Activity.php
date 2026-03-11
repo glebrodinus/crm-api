@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
 
 class Activity extends Model
 {
@@ -11,8 +12,6 @@ class Activity extends Model
         'account_id',
         'contact_id',
         'deal_id',
-
-        'created_by_user_id',
 
         'type',
         'outcome',
@@ -28,12 +27,31 @@ class Activity extends Model
         'direction',
 
         'occurred_at',
+
+        'created_by_user_id',
+        'updated_by_user_id',
     ];
 
     protected $casts = [
         'occurred_at' => 'datetime',
         'voicemail_left' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Account $account) {
+            if (Auth::check()) {
+                $account->created_by_user_id = Auth::id();
+                $account->updated_by_user_id = Auth::id();
+            }
+        });
+
+        static::updating(function (Account $account) {
+            if (Auth::check()) {
+                $account->updated_by_user_id = Auth::id();
+            }
+        });
+    }
 
     /* ================= Relationships ================= */
 

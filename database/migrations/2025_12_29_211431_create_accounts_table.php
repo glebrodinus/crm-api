@@ -10,15 +10,6 @@ return new class extends Migration {
         Schema::create('accounts', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('created_by_user_id')
-                ->constrained('users')
-                ->cascadeOnDelete();
-
-            $table->foreignId('updated_by_user_id')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete();
-
             // Communication tracking
             $table->timestamp('last_contacted_at')->nullable();  // last successful connection
             $table->timestamp('last_attempted_at')->nullable();  // last outreach attempt (call/email/text)
@@ -66,6 +57,16 @@ return new class extends Migration {
             $table->string('disqualified_reason')->nullable();
 
             $table->string('note')->nullable();
+
+
+            $table->foreignId('created_by_user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
+
+            $table->foreignId('updated_by_user_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
 
             $table->timestamps();
 

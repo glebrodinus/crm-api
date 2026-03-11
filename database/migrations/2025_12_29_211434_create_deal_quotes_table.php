@@ -11,7 +11,6 @@ return new class extends Migration {
             $table->id();
 
             $table->foreignId('deal_id')->constrained('deals')->cascadeOnDelete();
-            $table->foreignId('created_by_user_id')->constrained('users')->cascadeOnDelete();
 
             // only store real states
             $table->enum('status', ['draft', 'sent', 'rejected'])->default('draft');
@@ -30,6 +29,9 @@ return new class extends Migration {
 
             // accepted = selected quote (timestamp)
             $table->timestamp('selected_at')->nullable();
+
+            $table->foreignId('created_by_user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('updated_by_user_id')->nullable()->constrained('users')->nullOnDelete();
 
             $table->timestamps();
 

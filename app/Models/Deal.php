@@ -6,14 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\Auth;
 
 class Deal extends Model
 {
     protected $fillable = [
         'account_id',
         'contact_id',
-
-        'created_by_user_id',
 
         'status',
 
@@ -83,6 +82,9 @@ class Deal extends Model
 
         'closed_at',
         'note',
+
+        'created_by_user_id',
+        'updated_by_user_id',
     ];
 
     protected $casts = [
@@ -132,6 +134,22 @@ class Deal extends Model
         'agent_profit' => 'decimal:2',
         'agent_commission_percent' => 'decimal:2',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Account $account) {
+            if (Auth::check()) {
+                $account->created_by_user_id = Auth::id();
+                $account->updated_by_user_id = Auth::id();
+            }
+        });
+
+        static::updating(function (Account $account) {
+            if (Auth::check()) {
+                $account->updated_by_user_id = Auth::id();
+            }
+        });
+    }
 
     public function account(): BelongsTo
     {

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
 
 class DealQuote extends Model
 {
@@ -11,7 +12,7 @@ class DealQuote extends Model
 
     protected $fillable = [
         'deal_id',
-        'created_by_user_id',
+
         'status',
         'customer_rate',
         'fuel_surcharge',
@@ -20,6 +21,8 @@ class DealQuote extends Model
         'sent_at',
         'expires_at',
         'selected_at',
+        'created_by_user_id',
+        'updated_by_user_id',
     ];
 
     protected $casts = [
@@ -30,6 +33,22 @@ class DealQuote extends Model
         'customer_rate' => 'decimal:2',
         'fuel_surcharge' => 'decimal:2',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Account $account) {
+            if (Auth::check()) {
+                $account->created_by_user_id = Auth::id();
+                $account->updated_by_user_id = Auth::id();
+            }
+        });
+
+        static::updating(function (Account $account) {
+            if (Auth::check()) {
+                $account->updated_by_user_id = Auth::id();
+            }
+        });
+    }
 
     // optional computed badge
     public function getIsExpiredAttribute(): bool

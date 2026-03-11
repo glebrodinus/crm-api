@@ -14,8 +14,6 @@ class Account extends Model
 {
     protected $fillable = [
 
-        'created_by_user_id',
-
         'last_contacted_at',
         'last_attempted_at',
         'last_deal_at',
@@ -47,6 +45,9 @@ class Account extends Model
         'disqualified_reason',
 
         'note',
+
+        'created_by_user_id',
+        'updated_by_user_id',
     ];
 
     protected $casts = [
