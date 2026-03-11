@@ -40,7 +40,10 @@ class AccountController extends Controller
             ->limit(10)
             ->get(['name', 'dba_name', 'city', 'state']);
 
-        return $this->success('Similar accounts retrieved', $accounts);
+        return $accounts->isEmpty()
+            ? $this->success('No similar accounts found', [])
+            : $this->success('Similar accounts retrieved', $accounts);
+
     }
 
     public function store(Request $request)
