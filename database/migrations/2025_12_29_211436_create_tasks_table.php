@@ -64,9 +64,6 @@ return new class extends Migration {
                 ->constrained('users')
                 ->nullOnDelete();
 
-
-
-
             $table->timestamps();
 
             // Indexes

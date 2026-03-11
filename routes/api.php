@@ -90,6 +90,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{task}', [TaskController::class, 'show']);
         Route::put('/{task}', [TaskController::class, 'update']);
         Route::delete('/{task}', [TaskController::class, 'destroy']);
+        Route::patch('/{task}/complete', [TaskController::class, 'complete']);
+        Route::patch('/{task}/reopen', [TaskController::class, 'reopen']);
     });
 
     Route::prefix('deals')->group(function () {

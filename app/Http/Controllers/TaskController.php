@@ -124,6 +124,36 @@ class TaskController extends Controller
     }
 
     /**
+     * Mark task as completed
+     */
+    public function complete(Task $task)
+    {
+        $this->authorize('update', $task);
+
+        $task->update([
+            'completed_at' => now(),
+            'completed_by_user_id' => Auth::id(),
+        ]);
+
+        return $this->success('Task completed successfully', $task);
+    }
+
+    /**
+     * Reopen task
+     */
+    public function reopen(Task $task)
+    {
+        $this->authorize('update', $task);
+
+        $task->update([
+            'completed_at' => null,
+            'completed_by_user_id' => null,
+        ]);
+
+        return $this->success('Task reopened successfully', $task);
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Task $task)
