@@ -56,8 +56,8 @@ class AccountController extends Controller
             'task_due_at' => ['nullable', 'date'],
 
             // Optional initial link
-            'link_label' => ['nullable', 'string', 'max:255'],
-            'link_url'   => ['nullable', 'string', 'max:2048'],
+            'url_label' => ['nullable', 'string', 'max:255'],
+            'url'   => ['nullable', 'string', 'max:2048'],
         ]);
 
         $account = Account::create($data);
@@ -84,11 +84,11 @@ class AccountController extends Controller
             ]);
         }
 
-        if (! empty($data['link_url'])) {
+        if (! empty($data['url'])) {
             $account->links()->create([
                 'type' => 'link',
-                'label' => $data['link_label'] ?? null,
-                'url' => $data['link_url'],
+                'url_label' => $data['url_label'] ?? null,
+                'url' => $data['url'],
             ]);
         }
 
