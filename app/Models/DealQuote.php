@@ -36,16 +36,16 @@ class DealQuote extends Model
 
     protected static function booted(): void
     {
-        static::creating(function (Account $account) {
+        static::creating(function (DealQuote $dealQuote) {
             if (Auth::check()) {
-                $account->created_by_user_id = Auth::id();
-                $account->updated_by_user_id = Auth::id();
+                $dealQuote->created_by_user_id = Auth::id();
+                $dealQuote->updated_by_user_id = Auth::id();
             }
         });
 
-        static::updating(function (Account $account) {
+        static::updating(function (DealQuote $dealQuote) {
             if (Auth::check()) {
-                $account->updated_by_user_id = Auth::id();
+                $dealQuote->updated_by_user_id = Auth::id();
             }
         });
     }

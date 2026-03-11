@@ -39,16 +39,16 @@ class Activity extends Model
 
     protected static function booted(): void
     {
-        static::creating(function (Account $account) {
+        static::creating(function (Activity $activity) {
             if (Auth::check()) {
-                $account->created_by_user_id = Auth::id();
-                $account->updated_by_user_id = Auth::id();
+                $activity->created_by_user_id = Auth::id();
+                $activity->updated_by_user_id = Auth::id();
             }
         });
 
-        static::updating(function (Account $account) {
+        static::updating(function (Activity $activity) {
             if (Auth::check()) {
-                $account->updated_by_user_id = Auth::id();
+                $activity->updated_by_user_id = Auth::id();
             }
         });
     }

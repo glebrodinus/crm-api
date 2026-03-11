@@ -28,16 +28,16 @@ class CarrierQuote extends Model
 
     protected static function booted(): void
     {
-        static::creating(function (Account $account) {
+        static::creating(function (CarrierQuote $carrierQuote) {
             if (Auth::check()) {
-                $account->created_by_user_id = Auth::id();
-                $account->updated_by_user_id = Auth::id();
+                $carrierQuote->created_by_user_id = Auth::id();
+                $carrierQuote->updated_by_user_id = Auth::id();
             }
         });
 
-        static::updating(function (Account $account) {
+        static::updating(function (CarrierQuote $carrierQuote) {
             if (Auth::check()) {
-                $account->updated_by_user_id = Auth::id();
+                $carrierQuote->updated_by_user_id = Auth::id();
             }
         });
     }
