@@ -20,6 +20,7 @@ return new class extends Migration
 
             $table->decimal('minimum_profit_amount', 10, 2)->default(150);
             $table->decimal('target_margin_percent', 5, 2)->default(15);
+            $table->unsignedSmallInteger('quote_validity_days')->default(14);
 
             $table->timestamps();
 

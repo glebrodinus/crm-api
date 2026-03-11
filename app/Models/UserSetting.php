@@ -11,6 +11,7 @@ class UserSetting extends Model
         'user_id',
         'minimum_profit_amount',
         'target_margin_percent',
+        'quote_validity_days',
     ];
 
     protected function casts(): array

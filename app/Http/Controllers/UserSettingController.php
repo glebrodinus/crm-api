@@ -20,6 +20,7 @@ class UserSettingController extends Controller
         $data = $request->validate([
             'minimum_profit_amount' => 'nullable|numeric|min:0',
             'target_margin_percent' => 'nullable|numeric|min:0|max:100',
+            'quote_validity_days' => 'nullable|integer|min:1',
         ]);
 
         $settings = UserSetting::updateOrCreate(
