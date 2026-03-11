@@ -106,8 +106,7 @@ class DealController extends Controller
             'stops.*.note' => ['nullable', 'string', 'max:255'],
 
             // trailer types (stored in table)
-            'is_any_trailer_allowed' => ['nullable', 'boolean'],
-            'trailer_types' => ['nullable', 'array', 'max:7'],
+            'trailer_types' => ['required', 'array', 'min:1', 'max:7'],
             'trailer_types.*' => ['in:RGN,F,SD,HS,R,V,CN,PO'],
         ]);
 
@@ -154,9 +153,7 @@ class DealController extends Controller
             $this->syncStops($deal, $stops);
         }
 
-        if (!empty($data['is_any_trailer_allowed'])) {
-            $deal->trailerTypes()->delete();
-        } elseif (is_array($trailerTypes)) {
+        if (is_array($trailerTypes)) {
             $this->syncTrailerTypes($deal, $trailerTypes);
         }
 
@@ -184,9 +181,7 @@ class DealController extends Controller
             'notes',
         ]);
 
-        $deal->trailer_types = $deal->is_any_trailer_allowed
-            ? []
-            : $deal->trailerTypes->pluck('type')->values();
+        $deal->trailer_types = $deal->trailerTypes->pluck('type')->values();
 
         unset($deal->trailerTypes);
 
@@ -272,8 +267,7 @@ class DealController extends Controller
             'stops.*.date' => ['nullable', 'date'],
             'stops.*.note' => ['nullable', 'string', 'max:255'],
 
-            'is_any_trailer_allowed' => ['nullable', 'boolean'],
-            'trailer_types' => ['nullable', 'array', 'max:7'],
+            'trailer_types' => ['sometimes', 'array', 'min:1', 'max:7'],
             'trailer_types.*' => ['in:RGN,F,SD,HS,R,V,CN,PO'],
         ]);
 
@@ -311,15 +305,7 @@ class DealController extends Controller
             $this->syncStops($deal, $stops);
         }
 
-        $isAnyTrailerAllowed = array_key_exists('is_any_trailer_allowed', $data)
-            ? (bool) $data['is_any_trailer_allowed']
-            : (bool) $deal->is_any_trailer_allowed;
 
-        if ($isAnyTrailerAllowed) {
-            $deal->trailerTypes()->delete();
-        } elseif (is_array($trailerTypes)) {
-            $this->syncTrailerTypes($deal, $trailerTypes);
-        }
 
         // refresh and ensure rpms correct after potential distance/rate updates
         $deal->refresh();

@@ -82,7 +82,6 @@ class Deal extends Model
 
         'closed_at',
         'note',
-        'is_any_trailer_allowed',
 
         'created_by_user_id',
         'updated_by_user_id',
@@ -116,7 +115,6 @@ class Deal extends Model
         'is_hazardous' => 'boolean',
         'is_self_load' => 'boolean',
         'is_self_unload' => 'boolean',
-        'is_any_trailer_allowed' => 'boolean',
         'is_temp_required' => 'boolean',
         'temperature_from' => 'integer',
         'temperature_to' => 'integer',

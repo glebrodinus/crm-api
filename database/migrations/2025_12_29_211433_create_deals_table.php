@@ -111,8 +111,6 @@ return new class extends Migration {
 
             $table->string('note')->nullable();
 
-            $table->boolean('is_any_trailer_allowed')->default(false);
-
             $table->foreignId('created_by_user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('updated_by_user_id')->nullable()->constrained('users')->nullOnDelete();
 
