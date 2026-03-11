@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Deal;
 use App\Models\DealStop;
 use App\Models\DealTrailerType;
-use App\Models\DealMarketRate;
 use App\Models\Account;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -107,17 +106,9 @@ class DealController extends Controller
             'stops.*.note' => ['nullable', 'string', 'max:255'],
 
             // trailer types (stored in table)
+            'is_any_trailer_allowed' => ['nullable', 'boolean'],
             'trailer_types' => ['nullable', 'array', 'min:1', 'max:7'],
-            'trailer_types.*' => ['in:RGN,F,SD,HS,R,V,CN'],
-
-            // market rates (DAT / Truckstop / etc)
-            'market_rates' => ['nullable', 'array', 'max:20'],
-            'market_rates.*.source' => ['required_with:market_rates', 'string', 'max:50'],
-            'market_rates.*.low_rate' => ['nullable', 'numeric', 'min:0'],
-            'market_rates.*.avg_rate' => ['nullable', 'numeric', 'min:0'],
-            'market_rates.*.high_rate' => ['nullable', 'numeric', 'min:0'],
-            'market_rates.*.pulled_at' => ['nullable', 'date'],
-            'market_rates.*.note' => ['nullable', 'string', 'max:255'],
+            'trailer_types.*' => ['in:RGN,F,SD,HS,R,V,CN,PO'],
         ]);
 
         $account = Account::findOrFail($data['account_id']);
@@ -135,9 +126,8 @@ class DealController extends Controller
         // Extract embedded arrays
         $stops = $data['stops'] ?? null;
         $trailerTypes = $data['trailer_types'] ?? null;
-        $marketRates = $data['market_rates'] ?? null;
 
-        unset($data['stops'], $data['trailer_types'], $data['market_rates']);
+        unset($data['stops'], $data['trailer_types']);
 
         // acceptance recorded by agent
         if (!empty($data['customer_accepted_at'])) {
@@ -164,18 +154,16 @@ class DealController extends Controller
             $this->syncStops($deal, $stops);
         }
 
-        if (is_array($trailerTypes)) {
+        if (!empty($data['is_any_trailer_allowed'])) {
+            $deal->trailerTypes()->delete();
+        } elseif (is_array($trailerTypes)) {
             $this->syncTrailerTypes($deal, $trailerTypes);
-        }
-
-        if (is_array($marketRates)) {
-            $this->syncMarketRates($deal, $marketRates);
         }
 
         // recompute rpm snapshots again (in case distance/rates were set, or stops updated summary dates)
         $deal->update($this->applyRpmSnapshots($deal->fresh()->toArray()));
 
-        $deal->load(['account', 'contact', 'stops', 'trailerTypes', 'marketRates']);
+        $deal->load(['account', 'contact', 'stops', 'trailerTypes']);
 
         return $this->success('Deal created successfully', $deal, 201);
     }
@@ -189,7 +177,6 @@ class DealController extends Controller
             'contact',
             'stops',
             'trailerTypes:id,deal_id,type',
-            'marketRates',
             'quotes',
             'carrierQuotes',
             'tasks',
@@ -197,7 +184,10 @@ class DealController extends Controller
             'notes',
         ]);
 
-        $deal->trailer_types = $deal->trailerTypes->pluck('type')->values();
+        $deal->trailer_types = $deal->is_any_trailer_allowed
+            ? []
+            : $deal->trailerTypes->pluck('type')->values();
+
         unset($deal->trailerTypes);
 
         return $this->success('Deal retrieved successfully', $deal);
@@ -282,16 +272,9 @@ class DealController extends Controller
             'stops.*.date' => ['nullable', 'date'],
             'stops.*.note' => ['nullable', 'string', 'max:255'],
 
-            'trailer_types' => ['sometimes', 'array', 'min:1', 'max:7'],
-            'trailer_types.*' => ['in:RGN,F,SD,HS,R,V,CN'],
-
-            'market_rates' => ['sometimes', 'array', 'max:20'],
-            'market_rates.*.source' => ['required_with:market_rates', 'string', 'max:50'],
-            'market_rates.*.low_rate' => ['nullable', 'numeric', 'min:0'],
-            'market_rates.*.avg_rate' => ['nullable', 'numeric', 'min:0'],
-            'market_rates.*.high_rate' => ['nullable', 'numeric', 'min:0'],
-            'market_rates.*.pulled_at' => ['nullable', 'date'],
-            'market_rates.*.note' => ['nullable', 'string', 'max:255'],
+            'is_any_trailer_allowed' => ['nullable', 'boolean'],
+            'trailer_types' => ['nullable', 'array', 'min:1', 'max:7'],
+            'trailer_types.*' => ['in:RGN,F,SD,HS,R,V,CN,PO'],
         ]);
 
         // temp range validation
@@ -307,9 +290,8 @@ class DealController extends Controller
         // Extract embedded arrays (only when present)
         $stops = array_key_exists('stops', $data) ? $data['stops'] : null;
         $trailerTypes = array_key_exists('trailer_types', $data) ? $data['trailer_types'] : null;
-        $marketRates = array_key_exists('market_rates', $data) ? $data['market_rates'] : null;
 
-        unset($data['stops'], $data['trailer_types'], $data['market_rates']);
+        unset($data['stops'], $data['trailer_types']);
 
         // acceptance recorded by agent
         if (array_key_exists('customer_accepted_at', $data) && !empty($data['customer_accepted_at'])) {
@@ -329,19 +311,21 @@ class DealController extends Controller
             $this->syncStops($deal, $stops);
         }
 
-        if (is_array($trailerTypes)) {
-            $this->syncTrailerTypes($deal, $trailerTypes);
-        }
+        $isAnyTrailerAllowed = array_key_exists('is_any_trailer_allowed', $data)
+            ? (bool) $data['is_any_trailer_allowed']
+            : (bool) $deal->is_any_trailer_allowed;
 
-        if (is_array($marketRates)) {
-            $this->syncMarketRates($deal, $marketRates);
+        if ($isAnyTrailerAllowed) {
+            $deal->trailerTypes()->delete();
+        } elseif (is_array($trailerTypes)) {
+            $this->syncTrailerTypes($deal, $trailerTypes);
         }
 
         // refresh and ensure rpms correct after potential distance/rate updates
         $deal->refresh();
         $deal->update($this->applyRpmSnapshots($deal->toArray()));
 
-        $deal->load(['account', 'contact', 'stops', 'trailerTypes', 'marketRates']);
+        $deal->load(['account', 'contact', 'stops', 'trailerTypes']);
 
         return $this->success('Deal updated successfully', $deal);
     }
@@ -422,35 +406,6 @@ class DealController extends Controller
 
         if (!empty($rows)) {
             DealTrailerType::insert($rows);
-        }
-    }
-
-    private function syncMarketRates(Deal $deal, array $rates): void
-    {
-        $deal->marketRates()->delete();
-
-        $rows = [];
-        foreach ($rates as $r) {
-            $source = strtoupper(trim((string)($r['source'] ?? '')));
-            if ($source === '') {
-                continue;
-            }
-
-            $rows[] = [
-                'deal_id' => $deal->id,
-                'source' => $source,
-                'low_rate' => $r['low_rate'] ?? null,
-                'avg_rate' => $r['avg_rate'] ?? null,
-                'high_rate' => $r['high_rate'] ?? null,
-                'pulled_at' => $r['pulled_at'] ?? null,
-                'note' => $r['note'] ?? null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }
-
-        if (!empty($rows)) {
-            DealMarketRate::insert($rows);
         }
     }
 
