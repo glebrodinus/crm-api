@@ -8,6 +8,7 @@ use App\Models\DealTrailerType;
 use App\Models\Account;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Helpers\DealHelper;
 
 class DealController extends Controller
 {
@@ -160,7 +161,9 @@ class DealController extends Controller
         // recompute rpm snapshots again (in case distance/rates were set, or stops updated summary dates)
         $deal->update($this->applyRpmSnapshots($deal->fresh()->toArray()));
 
-        $deal->load(['account', 'contact', 'stops', 'trailerTypes']);
+        $deal->load(['account', 'contact', 'stops', 'trailerTypes:id,deal_id,type']);
+
+        DealHelper::transformSingleDeal($deal);
 
         return $this->success('Deal created successfully', $deal, 201);
     }
@@ -181,7 +184,7 @@ class DealController extends Controller
             'notes',
         ]);
 
-        $deal->trailer_types = $deal->trailerTypes->pluck('type')->values();
+        DealHelper::transformSingleDeal($deal);
 
         unset($deal->trailerTypes);
 
@@ -305,15 +308,20 @@ class DealController extends Controller
             $this->syncStops($deal, $stops);
         }
 
-
+        if (is_array($trailerTypes)) {
+            $this->syncTrailerTypes($deal, $trailerTypes);
+        }
 
         // refresh and ensure rpms correct after potential distance/rate updates
         $deal->refresh();
         $deal->update($this->applyRpmSnapshots($deal->toArray()));
 
-        $deal->load(['account', 'contact', 'stops', 'trailerTypes']);
+        $deal->load(['account', 'contact', 'stops', 'trailerTypes:id,deal_id,type']);
+
+        DealHelper::transformSingleDeal($deal);
 
         return $this->success('Deal updated successfully', $deal);
+        
     }
 
     public function destroy(Deal $deal)

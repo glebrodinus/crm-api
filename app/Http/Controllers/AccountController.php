@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Account;
 use Illuminate\Support\Facades\Auth;
+use App\Helpers\DealHelper;
 
 class AccountController extends Controller
 {
@@ -110,11 +111,7 @@ class AccountController extends Controller
             'links',
         ]);
 
-        // Transform trailer types for each deal to a simple array of strings
-        $account->deals->each(function ($deal) {
-            $deal->trailer_types = $deal->trailerTypes->pluck('type')->values();
-            unset($deal->trailerTypes);
-        });
+        DealHelper::transformTrailerTypes($account->deals);
 
         return $this->success('Account retrieved successfully', $account);
     }
