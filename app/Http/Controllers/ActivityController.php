@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Activity;
 use App\Models\Account;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Contact;
 
 class ActivityController extends Controller
 {
@@ -34,7 +35,7 @@ class ActivityController extends Controller
             'voicemail_left' => ['boolean'],
 
             'note' => ['nullable', 'string', 'max:255'],
-
+            'contact_name' => ['nullable', 'string', 'max:100'],
             'contact_phone' => ['nullable', 'string', 'max:10'],
             'contact_phone_extension' => ['nullable', 'string', 'max:6'],
             'contact_email' => ['nullable', 'email', 'max:100'],
@@ -48,6 +49,11 @@ class ActivityController extends Controller
 
         // Load account first
         $account = Account::findOrFail($data['account_id']);
+
+        if ($request->contact_id && !$request->contact_name) {
+            $contact = Contact::find($request->contact_id);
+            $data['contact_name'] = $contact?->first_name . ' ' . $contact?->last_name;
+        }
 
         // ACCOUNT OWNER CHECK
         $this->authorize('update', $account);
@@ -87,11 +93,13 @@ class ActivityController extends Controller
             'type'      => ['required', 'in:call,email,text,meeting,other'],
             'direction' => ['nullable', 'in:inbound,outbound'],
             'outcome'   => ['nullable', 'in:connected,attempted,sent,failed'],
+            'contact_id' => ['nullable', 'exists:contacts,id'],
 
             'voicemail_left' => ['boolean'],
 
             'note' => ['nullable', 'string', 'max:255'],
 
+            'contact_name' => ['nullable', 'string', 'max:100'],
             'contact_phone' => ['nullable', 'string', 'max:50'],
             'contact_phone_extension' => ['nullable', 'string', 'max:10'],
             'contact_email' => ['nullable', 'email', 'max:255'],
@@ -101,6 +109,11 @@ class ActivityController extends Controller
 
         if (in_array($data['type'], ['call', 'email', 'text']) && empty($data['direction'])) {
             return $this->error('Direction is required for call, email, and text.', [], 422);
+        }
+
+        if ($request->contact_id && !$request->contact_name) {
+            $contact = Contact::find($request->contact_id);
+            $data['contact_name'] = $contact?->first_name . ' ' . $contact?->last_name;
         }
 
         $activity->update($data);

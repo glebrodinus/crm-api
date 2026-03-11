@@ -20,6 +20,7 @@ class Activity extends Model
         'subject',
         'note',
 
+        'contact_name',
         'contact_phone',
         'contact_phone_extension',
         'contact_email',

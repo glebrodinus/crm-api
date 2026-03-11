@@ -34,6 +34,8 @@ return new class extends Migration {
             $table->boolean('voicemail_left')->default(false);
             $table->string('note')->nullable();
 
+            $table->string('contact_name')->nullable();
+            
             $table->string('contact_phone')->nullable();
             $table->string('contact_phone_extension')->nullable();
             $table->string('contact_email')->nullable();
