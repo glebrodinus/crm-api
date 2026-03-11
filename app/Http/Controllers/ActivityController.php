@@ -27,7 +27,7 @@ class ActivityController extends Controller
             'contact_id' => ['nullable', 'exists:contacts,id'],
             'deal_id'    => ['nullable', 'exists:deals,id'],
 
-            'type'      => ['required', 'in:call,email,text,meeting'],
+            'type'      => ['required', 'in:call,email,text,meeting,other'],
             'direction' => ['nullable', 'in:inbound,outbound'],
             'outcome'   => ['nullable', 'in:connected,attempted,sent,failed'],
 
@@ -84,7 +84,7 @@ class ActivityController extends Controller
         $this->authorize('update', $activity);
 
         $data = $request->validate([
-            'type'      => ['required', 'in:call,email,text,meeting'],
+            'type'      => ['required', 'in:call,email,text,meeting,other'],
             'direction' => ['nullable', 'in:inbound,outbound'],
             'outcome'   => ['nullable', 'in:connected,attempted,sent,failed'],
 
