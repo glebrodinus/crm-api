@@ -94,30 +94,29 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('deals')->group(function () {
 
-        // Deals
         Route::get('/', [DealController::class, 'index']);
         Route::post('/', [DealController::class, 'store']);
         Route::get('/{deal}', [DealController::class, 'show']);
         Route::put('/{deal}', [DealController::class, 'update']);
         Route::delete('/{deal}', [DealController::class, 'destroy']);
 
-        // ===============================
-        // Customer Quotes (Deal Quotes)
-        // ===============================
         Route::get('/{deal}/quotes', [DealQuoteController::class, 'index']);
-        Route::post('/{deal}/quotes', [DealQuoteController::class, 'store']);
-        Route::get('/{deal}/quotes/{quote}', [DealQuoteController::class, 'show']);
-        Route::put('/{deal}/quotes/{quote}', [DealQuoteController::class, 'update']);
-        Route::delete('/{deal}/quotes/{quote}', [DealQuoteController::class, 'destroy']);
+    });
 
-        // ===============================
-        // Carrier Quotes
-        // ===============================
-        Route::get('/{deal}/carrier-quotes', [CarrierQuoteController::class, 'index']);
-        Route::post('/{deal}/carrier-quotes', [CarrierQuoteController::class, 'store']);
-        Route::get('/{deal}/carrier-quotes/{carrierQuote}', [CarrierQuoteController::class, 'show']);
-        Route::put('/{deal}/carrier-quotes/{carrierQuote}', [CarrierQuoteController::class, 'update']);
-        Route::delete('/{deal}/carrier-quotes/{carrierQuote}', [CarrierQuoteController::class, 'destroy']);
+    Route::prefix('deal-quotes')->group(function () {
+        Route::get('/', [DealQuoteController::class, 'index']);
+        Route::post('/', [DealQuoteController::class, 'store']);
+        Route::get('/{dealQuote}', [DealQuoteController::class, 'show']);
+        Route::put('/{dealQuote}', [DealQuoteController::class, 'update']);
+        Route::delete('/{dealQuote}', [DealQuoteController::class, 'destroy']);
+    });
+
+    Route::prefix('carrier-quotes')->group(function () {
+        Route::get('/', [CarrierQuoteController::class, 'index']);
+        Route::post('/', [CarrierQuoteController::class, 'store']);
+        Route::get('/{carrierQuote}', [CarrierQuoteController::class, 'show']);
+        Route::put('/{carrierQuote}', [CarrierQuoteController::class, 'update']);
+        Route::delete('/{carrierQuote}', [CarrierQuoteController::class, 'destroy']);
     });
 
 });
