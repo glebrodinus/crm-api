@@ -24,7 +24,7 @@ class DealQuote extends Model
 
         'sent_at',
         'expires_at',
-        'selected_at',
+        'accepted_at',
         'rejected_at',
 
         'created_by_user_id',
@@ -34,7 +34,7 @@ class DealQuote extends Model
     protected $casts = [
         'sent_at' => 'datetime',
         'expires_at' => 'datetime',
-        'selected_at' => 'datetime',
+        'accepted_at' => 'datetime',
         'rejected_at' => 'datetime',
 
         'customer_rate' => 'decimal:2',

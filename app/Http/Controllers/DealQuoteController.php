@@ -75,8 +75,8 @@ class DealQuoteController extends Controller
 
         $this->authorize('update', $deal);
 
-        if ($dealQuote->selected_at) {
-            return $this->error('Selected quote cannot be edited.', [], 422);
+        if ($dealQuote->accepted_at) {
+            return $this->error('Accepted quote cannot be edited.', [], 422);
         }
 
         $data = $request->validate([
@@ -121,10 +121,10 @@ class DealQuoteController extends Controller
 
         if ($select) {
             DealQuote::where('deal_id', $deal->id)
-                ->update(['selected_at' => null]);
+                ->update(['accepted_at' => null]);
 
             $dealQuote->update([
-                'selected_at' => now(),
+                'accepted_at' => now(),
             ]);
 
             $deal->update([
@@ -144,8 +144,8 @@ class DealQuoteController extends Controller
 
         $this->authorize('update', $deal);
 
-        if ($dealQuote->selected_at) {
-            return $this->error('Selected quote cannot be deleted.', [], 422);
+        if ($dealQuote->accepted_at) {
+            return $this->error('Accepted quote cannot be deleted.', [], 422);
         }
 
         $deleted = $dealQuote->delete();

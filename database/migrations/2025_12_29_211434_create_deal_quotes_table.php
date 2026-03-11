@@ -36,7 +36,7 @@ return new class extends Migration {
             $table->timestamp('expires_at')->nullable();
 
             // accepted = selected quote
-            $table->timestamp('selected_at')->nullable();
+            $table->timestamp('accepted_at')->nullable();
 
             $table->foreignId('created_by_user_id')
                 ->constrained('users')
@@ -50,7 +50,7 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->index(['deal_id', 'status']);
-            $table->index(['deal_id', 'selected_at']);
+            $table->index(['deal_id', 'accepted_at']);
             $table->index('expires_at');
         });
     }
