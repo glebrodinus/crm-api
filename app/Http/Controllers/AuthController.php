@@ -8,8 +8,6 @@ use App\Models\User;
 use App\Models\VerificationToken;
 use App\Services\EmailService;
 use Illuminate\Support\Facades\App;
-use Laravel\Sanctum\PersonalAccessToken;
-use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {

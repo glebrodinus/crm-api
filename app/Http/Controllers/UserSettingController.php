@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\UserSetting;
+
+class UserSettingController extends Controller
+{
+    public function show()
+    {
+        $settings = Auth::user()->settings;
+
+        return response()->json($settings);
+    }
+
+    public function update(Request $request)
+    {
+        $data = $request->validate([
+            'minimum_profit_amount' => 'nullable|numeric|min:0',
+            'target_margin_percent' => 'nullable|numeric|min:0|max:100',
+        ]);
+
+        $settings = UserSetting::updateOrCreate(
+            ['user_id' => Auth::id()],
+            $data
+        );
+        
+        return $settings
+            ? $this->success('User settings updated successfully', $settings)
+            : $this->error('Failed to update user settings', [], 500);
+    }
+}

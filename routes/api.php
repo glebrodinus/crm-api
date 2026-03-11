@@ -13,6 +13,7 @@ use App\Http\Controllers\DealQuoteController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\CarrierQuoteController;
 use App\Http\Controllers\AccountUserAccessController;
+use App\Http\Controllers\UserSettingController;
 
 // Public (unauthenticated)
 Route::post('/register', [AuthController::class, 'register']);
@@ -39,6 +40,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Post because need to send data in body
         Route::post('/delete-account', [UserController::class, 'deleteAccount']);
+    });
+
+    Route::prefix('user/settings')->group(function () {
+        Route::get('/', [UserSettingController::class, 'show']);
+        Route::put('/', [UserSettingController::class, 'update']);
     });
 
     Route::prefix('accounts')->group(function () {

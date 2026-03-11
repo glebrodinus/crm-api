@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable
 {
@@ -46,6 +47,22 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_active' => 'boolean',
         ];
+    }
+
+    protected $with = ['settings'];
+
+    protected static function booted()
+    {
+        static::created(function ($user) {
+            UserSetting::create([
+                'user_id' => $user->id
+            ]);
+        });
+    }
+
+    public function settings(): HasOne
+    {
+        return $this->hasOne(UserSetting::class);
     }
 
     /**
