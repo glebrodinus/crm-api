@@ -25,6 +25,24 @@ class AccountController extends Controller
         return $this->success($message, $accounts);
     }
 
+    public function checkSimilar(Request $request)
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+        ]);
+
+        $accounts = Account::query()
+            ->where('created_by_user_id', Auth::id())
+            ->where(function ($query) use ($request) {
+                $query->where('name', 'like', '%' . $request->name . '%')
+                    ->orWhere('dba_name', 'like', '%' . $request->name . '%');
+            })
+            ->limit(10)
+            ->get(['name', 'dba_name', 'city', 'state']);
+
+        return $this->success('Similar accounts retrieved', $accounts);
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([

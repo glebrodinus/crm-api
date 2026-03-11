@@ -49,6 +49,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('accounts')->group(function () {
         Route::get('/', [AccountController::class, 'index']);
+        Route::get('/check-similar', [AccountController::class, 'checkSimilar']);
         Route::post('/', [AccountController::class, 'store']);
         Route::get('/{account}', [AccountController::class, 'show']);
         Route::put('/{account}', [AccountController::class, 'update']);
