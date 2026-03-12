@@ -103,6 +103,7 @@ class Deal extends Model
         'customer_accepted_at' => 'date:Y-m-d',
 
         'distance_miles' => 'integer',
+        'cargo_value' => 'decimal:2',
 
         'is_partial' => 'boolean',
         'is_divisible' => 'boolean',

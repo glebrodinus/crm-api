@@ -57,6 +57,7 @@ return new class extends Migration {
 
             // distance
             $table->unsignedInteger('distance_miles')->nullable();
+            $table->decimal('cargo_value', 10, 2)->nullable();
 
             // flags
             $table->boolean('is_partial')->default(false);

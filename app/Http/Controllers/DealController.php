@@ -61,6 +61,7 @@ class DealController extends Controller
             'actual_delivery_at' => ['nullable', 'date'],
 
             'distance_miles' => ['nullable', 'integer', 'min:0'],
+            'cargo_value' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
 
             'is_partial' => ['nullable', 'boolean'],
             'is_divisible' => ['nullable', 'boolean'],
@@ -226,6 +227,7 @@ class DealController extends Controller
             'actual_delivery_at' => ['nullable', 'date'],
 
             'distance_miles' => ['nullable', 'integer', 'min:0'],
+            'cargo_value' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
 
             'is_partial' => ['nullable', 'boolean'],
             'is_divisible' => ['nullable', 'boolean'],
