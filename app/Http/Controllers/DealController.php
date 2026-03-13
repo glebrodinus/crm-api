@@ -73,6 +73,9 @@ class DealController extends Controller
             'is_hazardous' => ['nullable', 'boolean'],
             'is_driver_assist_required' => ['nullable', 'boolean'],
             'is_ramps_required' => ['nullable', 'boolean'],
+            'is_twic_required' => ['nullable', 'boolean'],
+            'is_emodal_required' => ['nullable', 'boolean'],
+            'is_bonded_carrier_required' => ['nullable', 'boolean'],
 
             'is_temp_required' => ['nullable', 'boolean'],
             'temperature_from' => ['nullable', 'integer', 'min:-100', 'max:150'],
@@ -238,6 +241,9 @@ class DealController extends Controller
             'is_hazardous' => ['nullable', 'boolean'],
             'is_driver_assist_required' => ['nullable', 'boolean'],
             'is_ramps_required' => ['nullable', 'boolean'],
+            'is_twic_required' => ['nullable', 'boolean'],
+            'is_emodal_required' => ['nullable', 'boolean'],
+            'is_bonded_carrier_required' => ['nullable', 'boolean'],
 
             'is_temp_required' => ['nullable', 'boolean'],
             'temperature_from' => ['nullable', 'integer', 'min:-100', 'max:150'],
