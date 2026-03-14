@@ -12,13 +12,33 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Task::class);
 
-        // optional: return tasks list later
-        // return $this->success('Tasks retrieved successfully', Task::latest()->paginate(50));
-        return $this->success('Tasks retrieved successfully');
+        $query = Task::query()
+            ->where('created_by_user_id', Auth::id());
+
+        if ($request->filled('status')) {
+
+            if ($request->status === 'open') {
+                $query->whereNull('completed_at');
+            }
+
+            if ($request->status === 'completed') {
+                $query->whereNotNull('completed_at');
+            }
+        }
+
+        $tasks = $query
+            ->latest()
+            ->get();
+
+        $message = $tasks->isEmpty()
+            ? 'No tasks found'
+            : 'Tasks retrieved successfully';
+
+        return $this->success($message, $tasks);
     }
 
     /**
