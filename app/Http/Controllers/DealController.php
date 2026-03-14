@@ -20,13 +20,18 @@ class DealController extends Controller
         $query = Deal::query()
             ->where('created_by_user_id', Auth::id());
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+        if ($request->filled('statuses')) {
+            $statuses = explode(',', $request->statuses);
+            $query->whereIn('status', $statuses);
         }
 
         $deals = $query
             ->latest()
             ->get();
+
+        if($deals->isEmpty()) {
+            return $this->success('No deals found', [], 204);
+        }
 
         return $this->success('Deals retrieved successfully', $deals);
     }
