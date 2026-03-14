@@ -37,10 +37,12 @@ return new class extends Migration {
                 'inactive', // previously active, but not shipping recently
             ])->default('lead');
 
-            // Unreachable (flag, not status)
-            $table->boolean('is_unreachable')->default(false);
             $table->timestamp('unreachable_at')->nullable();
             $table->string('unreachable_reason')->nullable();
+            $table->foreignId('unreachable_by_user_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
 
             // Qualification system (3-state via timestamps)
             $table->timestamp('qualified_at')->nullable();
@@ -74,7 +76,6 @@ return new class extends Migration {
 
             // Indexes
             $table->index(['created_by_user_id', 'status']);
-            $table->index('is_unreachable');
 
             $table->index('last_contacted_at');
             $table->index('last_attempted_at');

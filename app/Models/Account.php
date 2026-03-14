@@ -34,8 +34,8 @@ class Account extends Model
 
         'status',
 
-        'is_unreachable',
         'unreachable_at',
+        'unreachable_by_user_id',
         'unreachable_reason',
 
         'qualified_at',
@@ -57,7 +57,6 @@ class Account extends Model
         'last_attempted_at' => 'datetime',
         'last_deal_at' => 'datetime',
 
-        'is_unreachable' => 'boolean',
         'unreachable_at' => 'datetime',
 
         'qualified_at' => 'datetime',

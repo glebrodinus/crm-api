@@ -156,13 +156,6 @@ class AccountController extends Controller
             'country'   => ['nullable', 'string', 'max:3'],
             'phone'     => ['nullable', 'string', 'max:20'],
             'timezone'  => ['nullable', 'in:PST,MST,CST,EST'],
-
-            // unreachable toggle
-            'is_unreachable' => ['nullable', 'boolean'],
-            'unreachable_reason' => ['nullable', 'string', 'max:255'],
-
-            // optional: allow clearing reason
-            // 'unreachable_reason' => ['nullable', 'string', 'max:255'],
         ]);
 
         // Never allow system-controlled fields to be updated here
@@ -176,20 +169,6 @@ class AccountController extends Controller
             $data['disqualified_at'],
             $data['disqualified_by_user_id']
         );
-
-        // handle unreachable stamps (only if field provided)
-        if (array_key_exists('is_unreachable', $data)) {
-            $isUnreachable = (bool) $data['is_unreachable'];
-
-            if ($isUnreachable && !$account->is_unreachable) {
-                $data['unreachable_at'] = now();
-            }
-
-            if (!$isUnreachable) {
-                $data['unreachable_at'] = null;
-                $data['unreachable_reason'] = null;
-            }
-        }
 
         $account->fill($data);
 
@@ -207,11 +186,6 @@ class AccountController extends Controller
     {
         $this->authorize('markReachable', $account);
 
-        if (! $account->is_unreachable) {
-            return $this->error('Account is not marked as unreachable', [], 400);
-        }
-
-        $account->is_unreachable = false;
         $account->unreachable_at = null;
         $account->unreachable_reason = null;
         $account->save();
@@ -227,11 +201,6 @@ class AccountController extends Controller
             'reason' => ['nullable', 'string', 'max:255'],
         ]);
 
-        if ($account->is_unreachable) {
-            return $this->error('Account is already marked as unreachable', [], 400);
-        }
-
-        $account->is_unreachable = true;
         $account->unreachable_at = now();
         $account->unreachable_reason = $data['reason'] ?? null;
         $account->save();
