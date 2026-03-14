@@ -29,11 +29,11 @@ class DealController extends Controller
             ->latest()
             ->get();
 
-        if($deals->isEmpty()) {
-            return $this->success('No deals found', [], 204);
-        }
+        $message = $deals->isEmpty()
+            ? 'No deals found'
+            : 'Deals retrieved successfully';
 
-        return $this->success('Deals retrieved successfully', $deals);
+        return $this->success($message, $deals);
     }
 
     public function store(Request $request)
