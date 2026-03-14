@@ -14,6 +14,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\CarrierQuoteController;
 use App\Http\Controllers\AccountUserAccessController;
 use App\Http\Controllers\UserSettingController;
+use App\Http\Controllers\DashboardController;
 
 // Public (unauthenticated)
 Route::post('/register', [AuthController::class, 'register']);
@@ -121,6 +122,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{carrierQuote}', [CarrierQuoteController::class, 'show']);
         Route::put('/{carrierQuote}', [CarrierQuoteController::class, 'update']);
         Route::delete('/{carrierQuote}', [CarrierQuoteController::class, 'destroy']);
+    });
+
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/kpi', [DashboardController::class, 'kpis']);
     });
 
 });
