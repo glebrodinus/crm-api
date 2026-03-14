@@ -65,12 +65,15 @@ return new class extends Migration {
             $table->boolean('is_oversize')->default(false);
             $table->boolean('is_overweight')->default(false);
             $table->boolean('is_tarp_required')->default(false);
+            $table->boolean('is_ramps_required')->default(false);
             $table->boolean('is_team')->default(false);
             $table->boolean('is_government')->default(false);
+            $table->boolean('is_twic_required')->default(false);
+            $table->boolean('is_emodal_required')->default(false);
+            $table->boolean('is_bonded_carrier_required')->default(false);
             $table->boolean('is_non_operational')->default(false);
             $table->boolean('is_hazardous')->default(false);
             $table->boolean('is_driver_assist_required')->default(false);
-            $table->boolean('is_ramps_required')->default(false);
 
             // temperature
             $table->boolean('is_temp_required')->default(false);

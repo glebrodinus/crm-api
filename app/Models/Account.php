@@ -40,6 +40,7 @@ class Account extends Model
 
         'qualified_at',
         'qualified_by_user_id',
+        'qualified_reason',
 
         'disqualified_at',
         'disqualified_by_user_id',
