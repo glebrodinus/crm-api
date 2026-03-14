@@ -25,7 +25,7 @@ class DashboardController extends Controller
             ->count();
 
         $kpiData = [
-            'accounts_count' => $accountsCount,
+            'active_accounts_count' => $accountsCount,
             'open_tasks_count' => $openTasksCount,
             'open_deals_count' => $openDealsCount,
         ];

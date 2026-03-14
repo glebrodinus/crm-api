@@ -125,7 +125,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::prefix('dashboard')->group(function () {
-        Route::get('/kpi', [DashboardController::class, 'kpis']);
+        Route::get('/kpi', [DashboardController::class, 'kpi']);
     });
 
 });
