@@ -27,4 +27,24 @@ class AccountPolicy
         return true;
     }
 
+    public function markReachable(User $user, Account $account): bool
+    {
+        return $account->created_by_user_id === $user->id;
+    }
+
+    public function markUnreachable(User $user, Account $account): bool
+    {
+        return $account->created_by_user_id === $user->id;
+    }
+
+    public function qualify(User $user, Account $account): bool
+    {
+        return $account->created_by_user_id === $user->id;
+    }
+
+    public function disqualify(User $user, Account $account): bool
+    {
+        return $account->created_by_user_id === $user->id;
+    }
+
 }
