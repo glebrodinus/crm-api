@@ -12,7 +12,7 @@ class UserSettingController extends Controller
     {
         $settings = Auth::user()->settings;
 
-        return response()->json($settings);
+        return $this->success('User settings retrieved successfully', $settings);
     }
 
     public function update(Request $request)
@@ -27,6 +27,10 @@ class UserSettingController extends Controller
             ['user_id' => Auth::id()],
             $data
         );
+
+        if (!$settings->wasChanged()) {
+            return $this->success('No changes to update', $settings);
+        }
         
         return $settings
             ? $this->success('User settings updated successfully', $settings)
