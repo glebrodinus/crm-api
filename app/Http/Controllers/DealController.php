@@ -12,12 +12,19 @@ use App\Helpers\DealHelper;
 
 class DealController extends Controller
 {
-    public function index()
+    
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Deal::class);
 
-        $deals = Deal::query()
-            ->where('created_by_user_id', Auth::id())
+        $query = Deal::query()
+            ->where('created_by_user_id', Auth::id());
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $deals = $query
             ->latest()
             ->get();
 
