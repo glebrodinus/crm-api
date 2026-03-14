@@ -61,6 +61,7 @@ class AccountController extends Controller
             'address_2' => ['nullable', 'string', 'max:255'],
             'country'   => ['nullable', 'string', 'max:3'],
             'phone'     => ['nullable', 'string', 'max:20'],
+            'timezone'  => ['nullable', 'in:PST,MST,CST,EST'],
 
             // unreachable flag (optional set on create)
             'is_unreachable' => ['nullable', 'boolean'],
@@ -158,6 +159,7 @@ class AccountController extends Controller
             'address_2' => ['nullable', 'string', 'max:255'],
             'country'   => ['nullable', 'string', 'max:3'],
             'phone'     => ['nullable', 'string', 'max:20'],
+            'timezone'  => ['nullable', 'in:PST,MST,CST,EST'],
 
             // unreachable toggle
             'is_unreachable' => ['nullable', 'boolean'],

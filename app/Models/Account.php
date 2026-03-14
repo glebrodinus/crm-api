@@ -30,6 +30,7 @@ class Account extends Model
         'zip',
         'country',
         'phone',
+        'timezone',
 
         'status',
 

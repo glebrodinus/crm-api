@@ -27,6 +27,7 @@ return new class extends Migration {
             $table->string('state', 2)->nullable();
             $table->string('zip', 10)->nullable();
             $table->string('country', 3)->nullable()->default('USA');
+            $table->enum('timezone', ['PST', 'MST', 'CST', 'EST'])->nullable();
             $table->string('phone')->nullable();
 
             // Relationship status (business relationship only)
