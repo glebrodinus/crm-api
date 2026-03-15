@@ -20,6 +20,11 @@ class DashboardController extends Controller
             ->whereNull('completed_at')
             ->count();
 
+        $openTasksTodayCount = Task::where('created_by_user_id', $userId)
+            ->whereNull('completed_at')
+            ->whereDate('due_at', now()->toDateString())
+            ->count();
+
         $openDealsCount = Deal::where('created_by_user_id', $userId)
             ->whereIn('status', ['pending', 'requested', 'quoted'])
             ->count();
@@ -27,6 +32,7 @@ class DashboardController extends Controller
         $kpiData = [
             'active_accounts_count' => $accountsCount,
             'open_tasks_count' => $openTasksCount,
+            'open_tasks_today_count' => $openTasksTodayCount,
             'open_deals_count' => $openDealsCount,
         ];
 
