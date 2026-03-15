@@ -56,7 +56,7 @@ return new class extends Migration {
             $table->timestamp('actual_delivery_at')->nullable();
 
             // distance
-            $table->unsignedInteger('distance_miles')->nullable();
+            $table->unsignedSmallInteger('distance_miles')->nullable();
             $table->decimal('cargo_value', 10, 2)->nullable();
 
             // flags
@@ -74,6 +74,7 @@ return new class extends Migration {
             $table->boolean('is_non_operational')->default(false);
             $table->boolean('is_hazardous')->default(false);
             $table->boolean('is_driver_assist_required')->default(false);
+            $table->boolean('is_extendable_trailer_required')->default(false);
 
             // temperature
             $table->boolean('is_temp_required')->default(false);

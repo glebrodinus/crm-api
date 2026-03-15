@@ -58,6 +58,7 @@ class Deal extends Model
         'is_twic_required',
         'is_emodal_required',
         'is_bonded_carrier_required',
+        'is_extendable_trailer_required',
 
         'is_temp_required',
         'temperature_from',
@@ -123,6 +124,7 @@ class Deal extends Model
         'is_twic_required' => 'boolean',
         'is_emodal_required' => 'boolean',
         'is_bonded_carrier_required' => 'boolean',
+        'is_extendable_trailer_required' => 'boolean',
         'is_temp_required' => 'boolean',
         'temperature_from' => 'integer',
         'temperature_to' => 'integer',
