@@ -21,7 +21,7 @@ class DashboardController extends Controller
             ->count();
 
         $openDealsCount = Deal::where('created_by_user_id', $userId)
-            ->whereIn('status', ['pending', 'quoted', 'drafted'])
+            ->whereIn('status', ['pending', 'requested', 'quoted'])
             ->count();
 
         $kpiData = [
