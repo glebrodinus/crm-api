@@ -25,10 +25,7 @@ return new class extends Migration {
             'meeting'
         ])->nullable();
 
-        $table->foreignId('follow_up_contact_id')
-            ->nullable()
-            ->constrained('contacts')
-            ->nullOnDelete();
+        $table->unsignedBigInteger('follow_up_contact_id')->nullable();
 
         $table->string('follow_up_note')->nullable();
 
