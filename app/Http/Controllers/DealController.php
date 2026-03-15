@@ -18,6 +18,7 @@ class DealController extends Controller
         $this->authorize('viewAny', Deal::class);
 
         $query = Deal::query()
+            ->with('account:id,name')
             ->where('created_by_user_id', Auth::id());
 
         if ($request->filled('statuses')) {
@@ -26,7 +27,7 @@ class DealController extends Controller
         }
 
         $deals = $query
-            ->latest()
+            ->orderBy('created_at', 'desc')
             ->get();
 
         $message = $deals->isEmpty()

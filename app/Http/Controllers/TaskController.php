@@ -12,15 +12,15 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+ public function index(Request $request)
     {
         $this->authorize('viewAny', Task::class);
 
         $query = Task::query()
+            ->with('account:id,name')
             ->where('created_by_user_id', Auth::id());
 
         if ($request->filled('status')) {
-
             if ($request->status === 'open') {
                 $query->whereNull('completed_at');
             }
@@ -31,7 +31,8 @@ class TaskController extends Controller
         }
 
         $tasks = $query
-            ->latest()
+            ->orderBy('due_at', 'asc')
+            ->orderBy('id', 'desc')
             ->get();
 
         $message = $tasks->isEmpty()
