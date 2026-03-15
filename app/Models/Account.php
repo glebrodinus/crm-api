@@ -56,16 +56,16 @@ class Account extends Model
     ];
 
     protected $casts = [
-        'last_contacted_at' => 'datetime',
-        'last_attempted_at' => 'datetime',
-        'last_deal_at' => 'datetime',
+        'last_contacted_at' => 'date:Y-m-d',
+        'last_attempted_at' => 'date:Y-m-d',
+        'last_deal_at' => 'date:Y-m-d',
 
-        'follow_up_at' => 'datetime',
+        'follow_up_at' => 'date:Y-m-d',
 
-        'unreachable_at' => 'datetime',
+        'unreachable_at' => 'date:Y-m-d',
 
-        'qualified_at' => 'datetime',
-        'disqualified_at' => 'datetime',
+        'qualified_at' => 'date:Y-m-d',
+        'disqualified_at' => 'date:Y-m-d',
     ];
 
     protected static function booted(): void
