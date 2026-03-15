@@ -10,10 +10,27 @@ return new class extends Migration {
         Schema::create('accounts', function (Blueprint $table) {
             $table->id();
 
-            // Communication tracking
-            $table->timestamp('last_contacted_at')->nullable();  // last successful connection
-            $table->timestamp('last_attempted_at')->nullable();  // last outreach attempt (call/email/text)
-            $table->timestamp('last_deal_at')->nullable();       // last booked deal date (set when a deal is booked)
+        // Communication tracking
+        $table->timestamp('last_contacted_at')->nullable();
+        $table->timestamp('last_attempted_at')->nullable();
+        $table->timestamp('last_deal_at')->nullable();
+
+        // Follow-up
+        $table->timestamp('follow_up_at')->nullable();
+
+        $table->enum('follow_up_type', [
+            'call',
+            'email',
+            'text',
+            'meeting'
+        ])->nullable();
+
+        $table->foreignId('follow_up_contact_id')
+            ->nullable()
+            ->constrained('contacts')
+            ->nullOnDelete();
+
+        $table->string('follow_up_note')->nullable();
 
             // Basic info
             $table->string('name');

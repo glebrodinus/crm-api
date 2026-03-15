@@ -43,7 +43,6 @@ class AccountController extends Controller
         return $accounts->isEmpty()
             ? $this->success('No similar accounts found', [])
             : $this->success('Similar accounts retrieved', $accounts);
-
     }
 
     public function store(Request $request)
@@ -62,6 +61,12 @@ class AccountController extends Controller
             'country'   => ['nullable', 'string', 'max:3'],
             'phone'     => ['nullable', 'string', 'max:20'],
             'timezone'  => ['nullable', 'in:PST,MST,CST,EST'],
+            'note'      => ['nullable', 'string', 'max:1000'],
+
+            // Account-level follow-up
+            'follow_up_at'   => ['nullable', 'date'],
+            'follow_up_type' => ['nullable', 'in:call,email,text,meeting'],
+            'follow_up_note' => ['nullable', 'string', 'max:255'],
 
             // Optional initial contact
             'contact_first_name' => ['nullable', 'string', 'max:50'],
@@ -69,16 +74,21 @@ class AccountController extends Controller
             'contact_phone'      => ['nullable', 'string', 'max:20'],
             'contact_email'      => ['nullable', 'email', 'max:255'],
 
-            // Optional initial task
-            'task_type'   => ['nullable', 'string', 'max:50'],
-            'task_due_at' => ['nullable', 'date'],
-
             // Optional initial link
             'url_label' => ['nullable', 'string', 'max:255'],
-            'url'   => ['nullable', 'string', 'max:2048'],
+            'url'       => ['nullable', 'string', 'max:2048'],
         ]);
 
-        $account = Account::create($data);
+        $accountData = collect($data)->except([
+            'contact_first_name',
+            'contact_last_name',
+            'contact_phone',
+            'contact_email',
+            'url_label',
+            'url',
+        ])->toArray();
+
+        $account = Account::create($accountData);
 
         if (! $account) {
             return $this->error('Failed to create account', [], 500);
@@ -86,31 +96,31 @@ class AccountController extends Controller
 
         // Optional: create first contact
         if (! empty($data['contact_first_name'])) {
-            $account->contacts()->create([
+            $contact = $account->contacts()->create([
                 'first_name' => $data['contact_first_name'],
                 'last_name'  => $data['contact_last_name'] ?? null,
                 'phone'      => $data['contact_phone'] ?? null,
                 'email'      => $data['contact_email'] ?? null,
             ]);
+
+            // Optional: if follow-up exists and no explicit contact id is provided on create,
+            // auto-attach the newly created contact
+            if (! empty($data['follow_up_at']) && empty($account->follow_up_contact_id)) {
+                $account->follow_up_contact_id = $contact->id;
+                $account->save();
+            }
         }
 
-        // Optional: create first task
-        if (! empty($data['task_type'])) {
-            $account->tasks()->create([
-                'type' => $data['task_type'],
-                'due_at' => $data['task_due_at'] ?? null,
-            ]);
-        }
-
+        // Optional: create first link
         if (! empty($data['url'])) {
             $account->links()->create([
-                'type' => 'link',
+                'type'      => 'link',
                 'url_label' => $data['url_label'] ?? null,
-                'url' => $data['url'],
+                'url'       => $data['url'],
             ]);
         }
 
-        $account->load(['contacts', 'tasks']);
+        $account->load(['contacts', 'links', 'followUpContact']);
         $account->refresh();
 
         return $this->success('Account created successfully', $account, 201);
@@ -121,6 +131,7 @@ class AccountController extends Controller
         $this->authorize('view', $account);
 
         $account->load([
+            'followUpContact',
             'contacts',
             'deals.trailerTypes:id,deal_id,type',
             'deals.stops',
@@ -156,18 +167,29 @@ class AccountController extends Controller
             'country'   => ['nullable', 'string', 'max:3'],
             'phone'     => ['nullable', 'string', 'max:20'],
             'timezone'  => ['nullable', 'in:PST,MST,CST,EST'],
+            'note'      => ['nullable', 'string', 'max:1000'],
+
+            'follow_up_at'         => ['nullable', 'date'],
+            'follow_up_type'       => ['nullable', 'in:call,email,text,meeting'],
+            'follow_up_contact_id' => ['nullable', 'integer', 'exists:contacts,id'],
+            'follow_up_note'       => ['nullable', 'string', 'max:255'],
         ]);
 
-        // Never allow system-controlled fields to be updated here
         unset(
             $data['created_by_user_id'],
+            $data['updated_by_user_id'],
             $data['last_contacted_at'],
             $data['last_attempted_at'],
             $data['last_deal_at'],
             $data['qualified_at'],
             $data['qualified_by_user_id'],
+            $data['qualified_reason'],
             $data['disqualified_at'],
-            $data['disqualified_by_user_id']
+            $data['disqualified_by_user_id'],
+            $data['disqualified_reason'],
+            $data['unreachable_at'],
+            $data['unreachable_by_user_id'],
+            $data['unreachable_reason']
         );
 
         $account->fill($data);
@@ -188,6 +210,7 @@ class AccountController extends Controller
 
         $account->unreachable_at = null;
         $account->unreachable_reason = null;
+        $account->unreachable_by_user_id = null;
         $account->save();
 
         return $this->success('Account marked as reachable', $account);
@@ -203,6 +226,7 @@ class AccountController extends Controller
 
         $account->unreachable_at = now();
         $account->unreachable_reason = $data['reason'] ?? null;
+        $account->unreachable_by_user_id = Auth::id();
         $account->save();
 
         return $this->success('Account marked as unreachable', $account);

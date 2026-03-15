@@ -9,14 +9,17 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
 
-
 class Account extends Model
 {
     protected $fillable = [
-
         'last_contacted_at',
         'last_attempted_at',
         'last_deal_at',
+
+        'follow_up_at',
+        'follow_up_type',
+        'follow_up_contact_id',
+        'follow_up_note',
 
         'name',
         'dba_name',
@@ -56,6 +59,8 @@ class Account extends Model
         'last_contacted_at' => 'datetime',
         'last_attempted_at' => 'datetime',
         'last_deal_at' => 'datetime',
+
+        'follow_up_at' => 'datetime',
 
         'unreachable_at' => 'datetime',
 
@@ -99,6 +104,16 @@ class Account extends Model
         return $this->belongsTo(User::class, 'disqualified_by_user_id');
     }
 
+    public function unreachableBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'unreachable_by_user_id');
+    }
+
+    public function followUpContact(): BelongsTo
+    {
+        return $this->belongsTo(Contact::class, 'follow_up_contact_id');
+    }
+
     public function contacts(): HasMany
     {
         return $this->hasMany(Contact::class);
@@ -136,7 +151,6 @@ class Account extends Model
             ->where('type', 'link');
     }
 
-    // helpers
     public function isQualified(): bool
     {
         return !is_null($this->qualified_at) && is_null($this->disqualified_at);
