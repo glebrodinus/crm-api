@@ -31,11 +31,13 @@ return new class extends Migration {
                 'quote',
                 'follow_up',
                 'email',
+                'text',
                 'meeting',
                 'update',
                 'invoice',
                 'payment',
                 'claim',
+                'other',
             ]);
 
             $table->string('title')->nullable();
