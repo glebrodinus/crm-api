@@ -121,7 +121,7 @@ class TaskController extends Controller
         // default priority if missing
         $data['priority'] = $data['priority'] ?? $task->priority ?? 1;
 
-        // ✅ completion logic (backend-controlled)
+        // completion logic (backend-controlled)
         if (!empty($data['completed_at'])) {
             $data['completed_by_user_id'] = Auth::id();
         } else {
