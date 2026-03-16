@@ -28,20 +28,14 @@ return new class extends Migration {
             // Task data
             $table->enum('type', [
                 'call',
-                'quote',
-                'follow_up',
                 'email',
                 'text',
                 'meeting',
-                'update',
-                'invoice',
-                'payment',
-                'claim',
                 'other',
             ]);
 
             $table->string('title')->nullable();
-            $table->tinyInteger('priority')->default(1); // 1 (low) to 4 (high)
+            $table->tinyInteger('priority')->default(1); // 1 (low) to 3 (high)
 
             $table->text('note')->nullable();
 

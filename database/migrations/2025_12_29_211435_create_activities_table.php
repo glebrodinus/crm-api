@@ -40,7 +40,9 @@ return new class extends Migration {
             $table->string('contact_phone_extension')->nullable();
             $table->string('contact_email')->nullable();
 
-            $table->timestampTz('occurred_at')->useCurrent(); // store UTC
+            $table->timestampTz('occurred_at')->useCurrent();
+
+            $table->unsignedSmallInteger('rating')->nullable(); // 1-3
 
             $table->foreignId('created_by_user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('updated_by_user_id')->nullable()->constrained('users')->nullOnDelete();

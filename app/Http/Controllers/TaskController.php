@@ -52,9 +52,9 @@ class TaskController extends Controller
             'contact_id' => ['nullable', 'exists:contacts,id'],
             'deal_id'    => ['nullable', 'exists:deals,id'],
 
-            'type' => ['required', 'in:call,quote,follow_up,email,text,meeting,update,invoice,payment,claim,other'],
+            'type' => ['required', 'in:call,email,text,meeting,other'],
             'title' => ['nullable', 'string', 'max:255'],
-            'priority' => ['nullable', 'integer', 'min:1', 'max:4'],
+            'priority' => ['nullable', 'integer', 'min:1', 'max:3'],
 
             'note' => ['nullable', 'string'],
             'due_at' => ['required', 'date'],
@@ -107,9 +107,9 @@ class TaskController extends Controller
             'contact_id' => ['nullable', 'exists:contacts,id'],
             'deal_id'    => ['nullable', 'exists:deals,id'],
 
-            'type' => ['required', 'in:call,quote,follow_up,email,text,meeting,update,invoice,payment,claim,other'],
+            'type' => ['required', 'in:call,email,text,meeting,other'],
             'title' => ['nullable', 'string', 'max:255'],
-            'priority' => ['nullable', 'integer', 'min:1', 'max:4'],
+            'priority' => ['nullable', 'integer', 'min:1', 'max:3'],
 
             'note' => ['nullable', 'string'],
             'due_at' => ['required', 'date'],

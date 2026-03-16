@@ -29,6 +29,8 @@ class Activity extends Model
 
         'occurred_at',
 
+        'rating',
+
         'created_by_user_id',
         'updated_by_user_id',
     ];

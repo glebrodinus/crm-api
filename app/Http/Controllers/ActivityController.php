@@ -41,6 +41,7 @@ class ActivityController extends Controller
             'contact_email' => ['nullable', 'email', 'max:100'],
 
             'occurred_at' => ['required', 'date'],
+            'rating' => ['nullable', 'integer', 'min:1', 'max:3'],
         ]);
 
         if (in_array($data['type'], ['call', 'email', 'text']) && empty($data['direction'])) {
@@ -105,6 +106,7 @@ class ActivityController extends Controller
             'contact_email' => ['nullable', 'email', 'max:255'],
 
             'occurred_at' => ['required', 'date'],
+            'rating' => ['nullable', 'integer', 'min:1', 'max:3'],
         ]);
 
         if (in_array($data['type'], ['call', 'email', 'text']) && empty($data['direction'])) {
